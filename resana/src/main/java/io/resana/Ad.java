@@ -208,15 +208,21 @@ final class Ad implements Parcelable, Serializable {
             for (int i = 0; i < data.maxView && i < indexes.size(); i++) { //downloading only max view number of visuals. not all
                 int index = indexes.get(i);
                 VisualDto v = ((NativeDto) data).visuals.get(index);
-                FileSpec hrzFile = new FileSpec(v.hrz.url, v.hrz.getFileName());
-                hrzFile.setChecksum(v.hrz.checksum);
-                FileSpec orgFile = new FileSpec(v.org.url, v.org.getFileName());
-                orgFile.setChecksum(v.org.checksum);
-                FileSpec sqFile = new FileSpec(v.sq.url, v.sq.getFileName());
-                sqFile.setChecksum(v.sq.checksum);
-                files.add(orgFile);
-                files.add(hrzFile);
-                files.add(sqFile);
+                if (ResanaConfig.gettingHrzVisual(c)) {
+                    FileSpec hrzFile = new FileSpec(v.hrz.url, v.hrz.getFileName());
+                    hrzFile.setChecksum(v.hrz.checksum);
+                    files.add(hrzFile);
+                }
+                if (ResanaConfig.gettingOrgVisual(c)) {
+                    FileSpec orgFile = new FileSpec(v.org.url, v.org.getFileName());
+                    orgFile.setChecksum(v.org.checksum);
+                    files.add(orgFile);
+                }
+                if (ResanaConfig.gettingSqVisual(c)) {
+                    FileSpec sqFile = new FileSpec(v.sq.url, v.sq.getFileName());
+                    sqFile.setChecksum(v.sq.checksum);
+                    files.add(sqFile);
+                }
             }
         }
         if (getType() == AdDto.AD_TYPE_SPLASH)

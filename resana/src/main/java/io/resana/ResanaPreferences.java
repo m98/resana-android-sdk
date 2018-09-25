@@ -6,6 +6,13 @@ import android.content.SharedPreferences;
 class ResanaPreferences {
     static final String PREFS = "RESANA_PREFS";
 
+    static final String PREF_SPLASH_AD_TYPE = "PREF_SPLASH_TYPE";
+    static final String PREF_NATIVE_AD_TYPE = "PREF_NATIVE_TYPE";
+    static final String PREF_SQ_VISUAL_TYPE = "PREF_SQ_VISUAL_TYPE";
+    static final String PREF_HRZ_VISUAL_TYPE = "PREF_HRZ_VISUAL_TYPE";
+    static final String PREF_ORG_VISUAL_TYPE = "PREF_ORG_VISUAL_TYPE";
+
+
     static final String PREF_LOG_LEVEL = "PREF_LOG_LEVEL";
     static final String PREF_CONTINUOUS_CLOSES = "PREF_CONTINUOUS_CLOSES";
     static final String PREF_CONTINUOUS_CLOSES_TYPES = "PREF_CONTINUOUS_CLOSES_TYPES";

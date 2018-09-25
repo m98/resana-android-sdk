@@ -363,19 +363,19 @@ class ResanaInternal {
                 final List<Ad> splashes = new ArrayList<>();
                 final List<Ad> natives = new ArrayList<>();
                 for (Ad ad : nonCtrls) {
-                    if (ad.getType() == AdDto.AD_TYPE_SPLASH)
+                    if (ResanaConfig.gettingSplashAds(context) && ad.getType() == AdDto.AD_TYPE_SPLASH)
                         splashes.add(ad);
-                    else if (ad.getType() == AdDto.AD_TYPE_SUBTITLE)
-                        subtitles.add(ad);
-                    else if (ad.getType() == AdDto.AD_TYPE_NATIVE)
+//                    else if (ad.getType() == AdDto.AD_TYPE_SUBTITLE)
+//                        subtitles.add(ad);
+                    else if (ResanaConfig.gettingNativeAds(context) && ad.getType() == AdDto.AD_TYPE_NATIVE)
                         if (!NativeAdProvider.isBlockedZone(ad))  //if received ad is in a blocked zone, we will not add it to list.
                             natives.add(ad);
                 }
-                if (subtitles.size() > 0)
-                    subtitleProvider.newAdsReceived(subtitles);
-                if (splashes.size() > 0)
+//                if (subtitles.size() > 0)
+//                    subtitleProvider.newAdsReceived(subtitles);
+                if (splashes.size() > 0 && ResanaConfig.gettingSplashAds(context))
                     splashProvider.newAdsReceived(splashes);
-                if (natives.size() > 0)
+                if (natives.size() > 0 && ResanaConfig.gettingNativeAds(context))
                     nativeProvider.newAdsReceived(natives);
             }
         }

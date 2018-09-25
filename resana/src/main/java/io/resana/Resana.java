@@ -42,15 +42,18 @@ public class Resana {
         this.instance = resanaInternal;
     }
 
-    public static Resana create(Context context, String[] tags, int logLevel) {
+    public static Resana create(Context context, String[] tags, int logLevel, ResanaConfig resanaConfig) {
+        if (resanaConfig == null)
+            throw new IllegalArgumentException("ResanaConfig cannot be null");
+        ResanaConfig.saveConfigs(context, resanaConfig);
         ResanaLog.setLogLevel(logLevel);
         final Resana resana = new Resana(ResanaInternal.getInstance(context, tags));
         references.add(resana);
         return resana;
     }
 
-    public static Resana create(Context context, String[] tags) {
-        return create(context, tags, LOG_LEVEL_INFO);
+    public static Resana create(Context context, String[] tags, ResanaConfig resanaConfig) {
+        return create(context, tags, LOG_LEVEL_VERBOSE, resanaConfig);
     }
 
     public void release() {
