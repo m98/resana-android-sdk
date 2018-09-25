@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.resana.player">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!--change following using your app package name-->
+    <permission
+        android:name="io.resana.player.permission.RESANA_ADS"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.resana.player.permission.RESANA_ADS" />
+
+    <application
+        android:name="io.resana.player.AppLoader"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="ResanaMediaId"
+            android:value="10004" />
+
+        <activity
+            android:name="io.resana.player.MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="io.resana.player.ActivityVideoPlayer"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen">
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.VIEW" />-->
+            <!--<category android:name="android.intent.category.DEFAULT" />-->
+            <!--<data android:mimeType="video/*" />-->
+            <!--</intent-filter>-->
+
+        </activity>
+
+        <activity
+            android:name=".SimpleVideoPlayer"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme.NoActionBar.FullScreen" />
+    </application>
+
+</manifest>
