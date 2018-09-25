@@ -31,6 +31,6 @@ dependencies {
 }
 ```
 ## Documentation
-* [User guide](https://github.com/oddrun/resana-android-sdk/blob/v_production/UserGuide.md): This guide contains examples on how to use Resana in your android project.
-* [Change log](https://github.com/oddrun/resana-android-sdk/blob/v_production/ChangeLog.md): Changes in the recent versions of resana.
+* [User guide](https://github.com/oddrun/resana-android-sdk/blob/master/UserGuide.md): This guide contains examples on how to use Resana in your android project.
+* [Change log](https://github.com/oddrun/resana-android-sdk/blob/master/ChangeLog.md): Changes in the recent versions of resana.
 
