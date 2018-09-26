@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,18 +18,10 @@ import static io.resana.ResanaPreferences.PREF_DISMISS_REST_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_DISMISS;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_START_TIME;
-import static io.resana.ResanaPreferences.PREF_REPORT_INSTALLED_PKGS;
-import static io.resana.ResanaPreferences.PREF_REPORT_INSTALLED_PKGS_INTERVAL;
-import static io.resana.ResanaPreferences.PREF_REPORT_METADATA_FIELDS;
-import static io.resana.ResanaPreferences.PREF_REPORT_METADATA_INTERVAL;
 import static io.resana.ResanaPreferences.PREF_RESANA_INFO_LABEL;
 import static io.resana.ResanaPreferences.PREF_RESANA_INFO_TEXT;
-import static io.resana.ResanaPreferences.getBoolean;
-import static io.resana.ResanaPreferences.getInt;
 import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.getPrefs;
-import static io.resana.ResanaPreferences.saveBoolean;
-import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveLong;
 
 class ResanaInternal {
@@ -88,28 +79,40 @@ class ResanaInternal {
     }
 
     NativeAd getNativeAd(boolean hasTitle) {
-        final NativeAd ad = nativeProvider.getAd(hasTitle, "");
-        return ad;
+        return getNativeAd(hasTitle, "");
     }
 
     NativeAd getNativeAd(boolean hasTitle, String zone) {
-        final NativeAd ad = nativeProvider.getAd(hasTitle, zone);
-        return ad;
+        if (!ResanaConfig.gettingNativeAds(appContext)) {
+            ResanaLog.e(TAG, "You didn't mention native ads in resana config");
+            return null;
+        }
+        return nativeProvider.getAd(hasTitle, zone);
     }
 
     void attachSplashViewer(SplashAdView adView) {
+        if (!ResanaConfig.gettingSplashAds(appContext)) {
+            ResanaLog.e(TAG, "You didn't mention splash ads in resana config");
+            return;
+        }
         splashProvider.attachViewer(adView);
     }
 
     void releaseSplash(Ad ad) {
+        if (splashProvider == null)
+            return;
         splashProvider.releaseAd(ad);
     }
 
     void detachSplashViewer(SplashAdView adView) {
+        if (splashProvider == null)
+            return;
         splashProvider.detachViewer(adView);
     }
 
     boolean isSplashAvailable() {
+        if (splashProvider == null)
+            return false;
         return splashProvider.isAdAvailable();
     }
 
@@ -146,8 +149,10 @@ class ResanaInternal {
     private void handleControlMessage(Ad msg) {
         for (ControlDto ctrl : msg.ctrls)
             if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {//TODO handle null pointer exeption here
-                splashProvider.flushCache();
-                nativeProvider.flushCache();
+                if (splashProvider != null)
+                    splashProvider.flushCache();
+                if (nativeProvider != null)
+                    nativeProvider.flushCache();
             } else if (ControlDto.CMD_COOL_DOWN.equals(ctrl.cmd)) {
                 CoolDownHelper.handleCoolDownCtrl(appContext, ctrl);
             } else if (ControlDto.CMD_RESANA_LABEL.equals(ctrl.cmd)) {
@@ -155,7 +160,8 @@ class ResanaInternal {
             } else if (ControlDto.CMD_DISMISS_OPTIONS.equals(ctrl.cmd)) {
                 handleDismissOptionsCtrl(ctrl);
             } else if (ControlDto.CMD_BLOCKED_ZONES.equals(ctrl.cmd)) {
-                nativeProvider.handleBlockedZones(ctrl);
+                if (nativeProvider != null)
+                    nativeProvider.handleBlockedZones(ctrl);
             } else if (ControlDto.CMD_LAST_MODIFIED_DATE.equals(ctrl.cmd)) {
                 saveLastModifiedDate(ctrl);
             }
@@ -227,11 +233,15 @@ class ResanaInternal {
     }
 
     void onSplashRendered(Ad ad) {
+        if (splashProvider == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_ACK);
         sendToServer(splashProvider.getRenderAck(ad));
     }
 
     void onNativeAdClicked(Context context, NativeAd ad) {
+        if (nativeProvider == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
         sendToServer(nativeProvider.getClickAck(ad.getSecretKey()));
@@ -244,22 +254,30 @@ class ResanaInternal {
     }
 
     void onSplashClicked(Ad ad) {
+        if (splashProvider == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.data.report);
         sendToServer(splashProvider.getClickAck(ad));
     }
 
     void onNativeAdLandingClicked(NativeAd ad) {
+        if (nativeProvider == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_LANDING_CLICK);
         sendToServer(nativeProvider.getLandingAck(ad.getSecretKey()));
     }
 
     void onNativeAdLongClick(Context context, NativeAd ad) {
+        if (nativeProvider == null)
+            return;
         if (adsAreDismissible)
             nativeProvider.showDismissOptions(context, ad, dismissOptions, instance);
     }
 
     void onSplashLandingClicked(Ad ad) {
+        if (splashProvider == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_LANDING_CLICK);
         sendToServer(splashProvider.getLandingClickAck(ad));
     }
@@ -321,7 +339,6 @@ class ResanaInternal {
                 for (Ad ad : nonCtrls)
                     ClickSimulator.getInstance(context).runOnReceiveSimulateClicksAndNotifySuccess(ad);
             } else {
-                final List<Ad> subtitles = new ArrayList<>();
                 final List<Ad> splashes = new ArrayList<>();
                 final List<Ad> natives = new ArrayList<>();
                 for (Ad ad : nonCtrls) {
