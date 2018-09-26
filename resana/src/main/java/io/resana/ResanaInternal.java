@@ -56,7 +56,6 @@ class ResanaInternal {
 
     private NativeAdProvider nativeProvider;
     private SplashAdProvider splashProvider;
-    private SubtitleAdProvider subtitleProvider;
 
     boolean adsAreDismissible;
     List<DismissOption> dismissOptions;
@@ -106,33 +105,12 @@ class ResanaInternal {
         splashProvider.releaseAd(ad);
     }
 
-    void releaseSubtitle(Ad ad) {
-        subtitleProvider.releaseAd(ad);
-    }
-
     void detachSplashViewer(SplashAdView adView) {
         splashProvider.detachViewer(adView);
     }
 
     boolean isSplashAvailable() {
         return splashProvider.isAdAvailable();
-    }
-
-    void attachSubtitleViewer(SubtitleAdView adView) {
-        subtitleProvider.attachAdViewer(adView);
-    }
-
-    Ad getSubtitleAd(List<String> notThese, long remainedTime) {
-        final Ad ad = subtitleProvider.getAd(notThese, remainedTime);
-        if (ad != null)
-            onSubtitleRendered(ad);
-        return ad;
-    }
-
-    int getSubtitleWaitTime(boolean firstTime) {
-        if (firstTime)
-            return CoolDownHelper.getSubtitleFirstWait(appContext);
-        return CoolDownHelper.getSubtitleWait(appContext);
     }
 
     private ResanaInternal(Context context, String[] tags) {
@@ -149,7 +127,6 @@ class ResanaInternal {
             nativeProvider = new NativeAdProvider(context);
         if (ResanaConfig.gettingSplashAds(context))
             splashProvider = new SplashAdProvider(context);
-        subtitleProvider = new SubtitleAdProvider(context);
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldFiles();
         NetworkHelper.checkUserAgent(appContext);
@@ -168,9 +145,8 @@ class ResanaInternal {
 
     private void handleControlMessage(Ad msg) {
         for (ControlDto ctrl : msg.ctrls)
-            if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {
+            if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {//TODO handle null pointer exeption here
                 splashProvider.flushCache();
-                subtitleProvider.flushCache();
                 nativeProvider.flushCache();
             } else if (ControlDto.CMD_COOL_DOWN.equals(ctrl.cmd)) {
                 CoolDownHelper.handleCoolDownCtrl(appContext, ctrl);
@@ -250,11 +226,6 @@ class ResanaInternal {
         AdVersionKeeper.adRendered(ad.getId() + "");
     }
 
-    private void onSubtitleRendered(Ad ad) {
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_ACK);
-        sendToServer(subtitleProvider.getRenderAck(ad));
-    }
-
     void onSplashRendered(Ad ad) {
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_ACK);
         sendToServer(splashProvider.getRenderAck(ad));
@@ -270,12 +241,6 @@ class ResanaInternal {
             nativeProvider.handleLandingClick(context, ad);
         }
 
-    }
-
-    void onSubtitleClicked(Ad ad) {
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_CLICK);
-        GoalActionMeter.getInstance(appContext).checkReport(ad.data.report);
-        sendToServer(subtitleProvider.getClickAck(ad));
     }
 
     void onSplashClicked(Ad ad) {
@@ -297,11 +262,6 @@ class ResanaInternal {
     void onSplashLandingClicked(Ad ad) {
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_LANDING_CLICK);
         sendToServer(splashProvider.getLandingClickAck(ad));
-    }
-
-    void onSubtitleLandingClicked(Ad ad) {
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_LANDING_CLICK);
-        sendToServer(subtitleProvider.getLandingClickAck(ad));
     }
 
     void onAdDismissed(String secretKey, DismissOption reason) {
@@ -367,14 +327,11 @@ class ResanaInternal {
                 for (Ad ad : nonCtrls) {
                     if (ResanaConfig.gettingSplashAds(context) && ad.getType() == AdDto.AD_TYPE_SPLASH)
                         splashes.add(ad);
-//                    else if (ad.getType() == AdDto.AD_TYPE_SUBTITLE)
-//                        subtitles.add(ad);
                     else if (ResanaConfig.gettingNativeAds(context) && ad.getType() == AdDto.AD_TYPE_NATIVE)
                         if (!NativeAdProvider.isBlockedZone(ad))  //if received ad is in a blocked zone, we will not add it to list.
                             natives.add(ad);
                 }
-//                if (subtitles.size() > 0)
-//                    subtitleProvider.newAdsReceived(subtitles);
+
                 if (splashes.size() > 0 && ResanaConfig.gettingSplashAds(context))
                     splashProvider.newAdsReceived(splashes);
                 if (natives.size() > 0 && ResanaConfig.gettingNativeAds(context))

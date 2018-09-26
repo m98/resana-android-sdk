@@ -28,8 +28,6 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -51,7 +49,7 @@ import java.util.List;
  * subtitle ads are deprecated and will be removed as soon as december 1,2018
  */
 @Deprecated
-public class SubtitleAdView extends FrameLayout implements View.OnClickListener, LandingView.Delegate {
+public class SubtitleAdView extends FrameLayout implements LandingView.Delegate {
     private static final String TAG = ResanaLog.TAG_PREF + "SubtitleAdView";
     private static final int WAIT_TIME_BEFORE_SKIP = 5 * 1000;
     private static final int TEXT_SIZE_SMALL = 12;
@@ -138,7 +136,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
 
     @Override
     public void landingActionClicked() {
-        landingClicked();
         dismissLanding();
         performAction(true);
     }
@@ -190,14 +187,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
         this.resana = resana;
         this.delegate = delegate;
         this.activity = activity;
-        post(new Runnable() {
-            @Override
-            public void run() {
-                resanaInternal.attachSubtitleViewer(SubtitleAdView.this);
-            }
-        });
-        removeCallbacks(sendVideoPlayedReport);
-        postDelayed(sendVideoPlayedReport, 10 * 1000);
     }
 
     /**
@@ -302,7 +291,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
 
         image = new ImageView(getContext());
         image.setVisibility(INVISIBLE);
-        image.setOnClickListener(SubtitleAdView.this);
         addView(image, getChildCount(), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL));
 
         container = new LinearLayout(getContext());
@@ -312,7 +300,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
         container.setVisibility(INVISIBLE);
 
         logo = new ImageView(getContext());
-        logo.setOnClickListener(this);
         logo.setAdjustViewBounds(true);
         logo.setPadding(space2dp, space2dp, space2dp, space2dp);
         logo.setVisibility(INVISIBLE);
@@ -320,15 +307,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
 
         ribbon = new HorizontalScrollView(getContext());
         ribbon.setHorizontalScrollBarEnabled(false);
-        ribbon.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    SubtitleAdView.this.onClick(v);
-                }
-                return false;
-            }
-        });
 
         text = new TextView(getContext());
         text.setPadding(space5dp, space2dp, space5dp, space2dp);
@@ -342,7 +320,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
         addView(container, getChildCount(), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
 
         skip = new FrameLayout(getContext());
-        skip.setOnClickListener(this);
         skipText = new TextView(getContext());
         skipText.setText("Skip");
         skipText.setTextColor(Color.WHITE);
@@ -427,22 +404,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
         ribbon.requestLayout();
     }
 
-
-    @Override
-    public void onClick(View v) {
-        if (v.equals(skip))
-            skipCurrentAd();
-        else {
-            if (!allowClick())
-                return;
-            adClicked();
-            if (currAd.hasLanding())
-                openLanding();
-            else
-                performAction(false);
-        }
-    }
-
     private boolean allowClick() {
         return resana != null && resana.instance != null &&
                 (currAd.hasLanding()
@@ -468,18 +429,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
             landDialog.show();
         } catch (Exception ignored) {
         }
-    }
-
-    private void adClicked() {
-        final ResanaInternal resanaInternal = resana.instance;
-        if (resanaInternal != null)
-            resanaInternal.onSubtitleClicked(currAd);
-    }
-
-    private void landingClicked() {
-        final ResanaInternal resanaInternal = resana.instance;
-        if (resanaInternal != null)
-            resanaInternal.onSubtitleLandingClicked(currAd);
     }
 
     private void performAction(boolean fromLanding) {
@@ -549,8 +498,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
         }
         ResanaLog.v(TAG, "remainedTime=" + remainedTime);
         ResanaInternal resanaInternal = resana.instance;
-        if (resanaInternal != null)
-            return resanaInternal.getSubtitleAd(skipRepetitiveAds ? renderedAds : null, remainedTime);
         return null;
     }
 
@@ -677,9 +624,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
     private void endCurrentAd() {
         ResanaLog.v(TAG, "EndCurrentAd");
         state = State.Idle;
-        final ResanaInternal resanaInternal = resana.instance;
-        if (currAd != null && resanaInternal != null)
-            resanaInternal.releaseSubtitle(currAd);
         currAd = null;
         image.setImageDrawable(null);
         logo.setImageDrawable(null);
@@ -718,8 +662,6 @@ public class SubtitleAdView extends FrameLayout implements View.OnClickListener,
 
     private int getWaitTime(boolean first) {
         final ResanaInternal resanaInternal = resana.instance;
-        if (resanaInternal != null)
-            return resanaInternal.getSubtitleWaitTime(first);
         return CoolDownHelper.getDefaultSubtitleWaitTime(first);
     }
 
