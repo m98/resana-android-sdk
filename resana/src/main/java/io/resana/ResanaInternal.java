@@ -145,8 +145,10 @@ class ResanaInternal {
         media = AdViewUtil.getMediaId(appContext);
         if (media == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
-        nativeProvider = new NativeAdProvider(context);
-        splashProvider = new SplashAdProvider(context);
+        if (ResanaConfig.gettingNativeAds(context))
+            nativeProvider = new NativeAdProvider(context);
+        if (ResanaConfig.gettingSplashAds(context))
+            splashProvider = new SplashAdProvider(context);
         subtitleProvider = new SubtitleAdProvider(context);
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldFiles();
