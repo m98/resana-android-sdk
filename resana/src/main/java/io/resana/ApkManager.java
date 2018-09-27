@@ -2,19 +2,10 @@ package io.resana;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.provider.Settings;
 import android.text.TextUtils;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static io.resana.StorageManager.canReadFromStorage;
-import static io.resana.StorageManager.canWriteToStorage;
-import static io.resana.StorageManager.getApksDir;
 
 class ApkManager {
     private static final String PREFS = "RESANA_APKS_76432369";
@@ -39,6 +30,12 @@ class ApkManager {
 
     private ApkManager(Context context) {
         this.appContext = context.getApplicationContext();
+    }
+
+    boolean isApkInstalled(Ad ad) {
+        if (!ad.hasPackageName())
+            return false;
+        return isApkInstalled(ad.getPackageName());
     }
 
     boolean isApkInstalled(String pkg) {

@@ -100,6 +100,26 @@ final class Ad implements Parcelable, Serializable {
                 || AdVersionKeeper.isRenderedEnough(this);
     }
 
+    boolean hasApk() {
+        return data.apk != null && data.apk.url != null && !data.apk.url.equals("");
+    }
+
+    boolean hasPackageName() {
+        return data.apk != null && data.apk.pkg != null && !data.apk.pkg.equals("");
+    }
+
+    String getPackageName() {
+        if (hasPackageName())
+            return data.apk.pkg;
+        return "";
+    }
+
+    String getApkUrl() {
+        if (hasApk())
+            return data.apk.url;
+        return null;
+    }
+
     Integer getType() {
         if (data != null)
             return data.type;

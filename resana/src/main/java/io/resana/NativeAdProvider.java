@@ -1,6 +1,5 @@
 package io.resana;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -140,13 +139,15 @@ class NativeAdProvider {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
         if (!isLoadingCacheAds) {
             for (Ad item : items) {
-                downloadAdFiles(item);
-                if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
-                    ads.get().add(item);
-                    ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+                if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
+                    downloadAdFiles(item);
+                    if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
+                        ads.get().add(item);
+                        ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+                    }
                 }
-                ads.needsPersist();
             }
+            ads.needsPersist();
             ads.persistIfNeeded();
             separateAds();
         }

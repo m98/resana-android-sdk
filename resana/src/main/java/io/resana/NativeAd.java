@@ -1,6 +1,5 @@
 package io.resana;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -24,6 +23,7 @@ public class NativeAd {
     private String intentUri;
     private String landingUrl;
     private int landingType;
+    private String apkUrl;
     private String labelUrl;
     private String labelText;
     private String backgroundColor;
@@ -52,6 +52,7 @@ public class NativeAd {
             this.labelText = ad.data.resanaLabel.text;
         } else
             labelText = ResanaPreferences.getString(context, ResanaPreferences.PREF_RESANA_INFO_TEXT, ResanaInternal.DEFAULT_RESANA_INFO_TEXT);
+        this.apkUrl = ad.getApkUrl();
         this.backgroundColor = ad.data.backgroundColor;
         this.callForAction = ad.data.callForAction;
         this.shortOrdinaryText = ((NativeDto) ad.data).texts.ordinaryText.shortText;
@@ -124,6 +125,14 @@ public class NativeAd {
 
     String getLabelUrl() {
         return labelUrl;
+    }
+
+    boolean hasApk() {
+        return apkUrl != null;
+    }
+
+    String getApkUrl() {
+        return apkUrl;
     }
 
     public String getBackgroundColor() {
