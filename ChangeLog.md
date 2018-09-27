@@ -1,5 +1,12 @@
 # Resana Change Log
 
+## 7.1.0 STABLE
+* handling apk. ads that their apk file exists will not show.
+* removing some part of subtitle ads. subtitle ads will completly removed as soon as december 1,2018
+* creating resana configuration for developers to select type of ads and visuals.
+* SDK_VERSION_NUM = 17
+* DB_VERSION = 7
+
 ## 6.3.4 STABLE
 * some enhancements in landing
 * some bugs fixed about background color of splash ads 
