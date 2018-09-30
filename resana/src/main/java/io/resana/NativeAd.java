@@ -24,6 +24,7 @@ public class NativeAd {
     private String landingUrl;
     private int landingType;
     private String apkUrl;
+    private String apkFileName;
     private String labelUrl;
     private String labelText;
     private String backgroundColor;
@@ -53,6 +54,7 @@ public class NativeAd {
         } else
             labelText = ResanaPreferences.getString(context, ResanaPreferences.PREF_RESANA_INFO_TEXT, ResanaInternal.DEFAULT_RESANA_INFO_TEXT);
         this.apkUrl = ad.getApkUrl();
+        this.apkFileName = ad.hasApk() ? ad.data.apk.getApkFileName() : null;
         this.backgroundColor = ad.data.backgroundColor;
         this.callForAction = ad.data.callForAction;
         this.shortOrdinaryText = ((NativeDto) ad.data).texts.ordinaryText.shortText;
@@ -133,6 +135,10 @@ public class NativeAd {
 
     String getApkUrl() {
         return apkUrl;
+    }
+
+    public String getApkFileName() {
+        return apkFileName;
     }
 
     public String getBackgroundColor() {
@@ -243,15 +249,6 @@ public class NativeAd {
          */
         public File getFile() {
             return imageFile;
-        }
-
-        /**
-         * get url of visual
-         *
-         * @return
-         */
-        public String getUrl() {
-            return url;
         }
 
         /**

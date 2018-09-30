@@ -1,24 +1,16 @@
 package io.resana;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.File;
 import java.io.Serializable;
 
 public class ApkDto implements Parcelable, Serializable {
-    public static final Creator<ApkDto> CREATOR = new Creator<ApkDto>() {
-        @Override
-        public ApkDto createFromParcel(Parcel in) {
-            return new ApkDto(in);
-        }
 
-        @Override
-        public ApkDto[] newArray(int size) {
-            return new ApkDto[size];
-        }
-    };
     static final int NETWORK_TYPE_WIFI_ONLY = 0;
     static final int NETWORK_TYPE_ANY = 1;
     @Mandatory
@@ -37,6 +29,7 @@ public class ApkDto implements Parcelable, Serializable {
     @SerializedName("pt")
     int prepareTime = 0;
 
+
     protected ApkDto(Parcel in) {
         pkg = in.readString();
         url = in.readString();
@@ -49,6 +42,18 @@ public class ApkDto implements Parcelable, Serializable {
         version = in.readInt();
         prepareTime = in.readInt();
     }
+
+    public static final Creator<ApkDto> CREATOR = new Creator<ApkDto>() {
+        @Override
+        public ApkDto createFromParcel(Parcel in) {
+            return new ApkDto(in);
+        }
+
+        @Override
+        public ApkDto[] newArray(int size) {
+            return new ApkDto[size];
+        }
+    };
 
     @Override
     public int describeContents() {
@@ -68,5 +73,13 @@ public class ApkDto implements Parcelable, Serializable {
         dest.writeString(checksum);
         dest.writeInt(version);
         dest.writeInt(prepareTime);
+    }
+
+    String getApkFileName() {
+        return pkg + "_" + version;
+    }
+
+    File getApkFile(Context context) {
+        return new File(StorageManager.getApksDir(context), getApkFileName());
     }
 }
