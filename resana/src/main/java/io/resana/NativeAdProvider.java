@@ -267,6 +267,8 @@ class NativeAdProvider {
             ResanaLog.d(TAG, "get: Native dismissRestTime");
             return null;
         }
+        if (isLoadingCacheAds)
+            return null;
         final Ad ad = internalGetAd(hasTitle, zone);
         if (ad != null) {
             final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
