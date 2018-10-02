@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -473,14 +472,7 @@ class NativeAdProvider {
                     else if (success) {
                         File apk = new FileManager.FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(context);
                         Log.e(TAG, "onFinish: file: " + apk.getAbsolutePath());
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        Uri n = ResanaFileProvider.getUriForFile(context, context.getPackageName() + ".provider", apk);
-                        if (Build.VERSION.SDK_INT >= 24)
-                            i.setDataAndType(n, "application/vnd.android.package-archive");
-                        else
-                            i.setDataAndType(Uri.fromFile(apk), "application/vnd.android.package-archive");
-                        context.startActivity(i);
+                        ApkManager.installApk(context, apk);
                     }
                 }
             });

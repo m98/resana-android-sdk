@@ -1,9 +1,14 @@
 package io.resana;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
+import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +63,22 @@ class ApkManager {
                 if (app != null && !TextUtils.isEmpty(app.packageName) && (app.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
                     pkgs.add(app.packageName);
         return pkgs;
+    }
+
+    static void installApk(Context context, File apk) {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri n = ResanaFileProvider.getUriForFile(context, context.getPackageName() + ".provider", apk);
+            if (Build.VERSION.SDK_INT >= 24)
+                i.setDataAndType(n, "application/vnd.android.package-archive");
+            else
+                i.setDataAndType(Uri.fromFile(apk), "application/vnd.android.package-archive");
+            context.startActivity(i);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "مشکلی در نصب برنامه بوجود آمد", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
