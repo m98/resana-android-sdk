@@ -460,7 +460,9 @@ class NativeAdProvider {
     }
 
     void handleLandingClick(final Context context, final NativeAd ad) {
-        ResanaInternal.getInstance(context, null).onNativeAdLandingClicked(ad);
+        if (ResanaInternal.instance == null)
+            return;
+        ResanaInternal.instance.onNativeAdLandingClicked(ad);
         if (ad.hasApk()) {
             Toast.makeText(context, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
             FileManager.getInstance(context).downloadFile(new FileSpec(ad.getApkUrl(), FileSpec.DIR_TYPE_APKS, ad.getApkFileName()), false, new Delegate() {
