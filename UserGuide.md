@@ -12,7 +12,7 @@ allprojects {
  
     
 dependencies {
-    implementation( 'io.resana:resana:6.3.1@aar' ) {transitive = true}
+    implementation( 'io.resana:resana:7.3.0@aar' ) {transitive = true}
 }
 ```
 Resana progourd

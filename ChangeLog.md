@@ -1,5 +1,12 @@
 # Resana Change Log
 
+## 7.3.0 STABLE
+* downloading and installing apk when clicking on ad.
+* deleting corrupte downloaded files.
+* some bugs fixed.
+* SDK_VERSION_NUM = 17
+* DB_VERSION = 7
+
 ## 7.1.0 STABLE
 * handling apk. ads that their apk file exists will not show.
 * removing some part of subtitle ads. subtitle ads will completly removed as soon as december 1,2018
