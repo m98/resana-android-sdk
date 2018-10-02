@@ -138,7 +138,6 @@ class ControlDto implements Parcelable, Serializable {
     }
 
     static class CoolDownParams extends Params implements Parcelable, Serializable {
-        Subtitle subtitle;
         Chance splash;
         Chance nativeAd;
 
@@ -147,20 +146,17 @@ class ControlDto implements Parcelable, Serializable {
 
         static CoolDownParams fromJson(JSONObject jo) throws JSONException {
             CoolDownParams res = new CoolDownParams();
-            if (jo.has("sub"))
-                res.subtitle = Subtitle.fromJson(jo.getJSONObject("sub"));
             if (jo.has("splash"))
                 res.splash = Chance.fromJson(jo.getJSONObject("splash"));
             if (jo.has("native"))
                 res.nativeAd = Chance.fromJson(jo.getJSONObject("native"));
-            if (res.subtitle == null && res.splash == null && res.nativeAd == null)
+            if (res.splash == null && res.nativeAd == null)
                 throw new RuntimeException("invalid cooldown param!");
             return res;
         }
 
         protected CoolDownParams(Parcel in) {
             super(in);
-            subtitle = in.readParcelable(Subtitle.class.getClassLoader());
             splash = in.readParcelable(Chance.class.getClassLoader());
             nativeAd = in.readParcelable(Chance.class.getClassLoader());
         }
@@ -168,7 +164,6 @@ class ControlDto implements Parcelable, Serializable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
-            dest.writeParcelable(subtitle, flags);
             dest.writeParcelable(splash, flags);
             dest.writeParcelable(nativeAd, flags);
         }
@@ -193,95 +188,9 @@ class ControlDto implements Parcelable, Serializable {
         @Override
         public String toString() {
             return "CoolDownParams{" +
-                    "subtitle=" + subtitle +
                     ", splash=" + splash +
                     ", native=" + nativeAd +
                     "} ";
-        }
-
-        static class Subtitle implements Parcelable, Serializable {
-            //mandatory
-            int min;
-            int max;
-            int first;
-
-            //optional
-            double chance = 1;
-            int ttl = -1;
-            double firstChance = -1; //f
-            int interval = -1;
-
-            private Subtitle() {
-            }
-
-            static Subtitle fromJson(JSONObject jo) throws JSONException {
-                Subtitle res = new Subtitle();
-                res.min = jo.getInt("min");
-                res.max = jo.getInt("max");
-                res.first = jo.getInt("first");
-                if (jo.has("ttl"))
-                    res.ttl = jo.getInt("ttl");
-                if (jo.has("chance"))
-                    res.chance = jo.getDouble("chance");
-                if (jo.has("f"))
-                    res.firstChance = jo.getDouble("f");
-                if (jo.has("i"))
-                    res.interval = jo.getInt("i");
-                if (res.min < 0 || res.max < 0 || res.first < 0 || res.min > res.max || res.chance < 0 || res.chance > 1 || res.firstChance > 1)
-                    throw new RuntimeException("incorrect values!");
-                return res;
-            }
-
-            protected Subtitle(Parcel in) {
-                min = in.readInt();
-                max = in.readInt();
-                first = in.readInt();
-                chance = in.readDouble();
-                ttl = in.readInt();
-                firstChance = in.readDouble();
-                interval = in.readInt();
-            }
-
-            @Override
-            public void writeToParcel(Parcel dest, int flags) {
-                dest.writeInt(min);
-                dest.writeInt(max);
-                dest.writeInt(first);
-                dest.writeDouble(chance);
-                dest.writeInt(ttl);
-                dest.writeDouble(firstChance);
-                dest.writeInt(interval);
-            }
-
-            @Override
-            public int describeContents() {
-                return 0;
-            }
-
-            public static final Creator<Subtitle> CREATOR = new Creator<Subtitle>() {
-                @Override
-                public Subtitle createFromParcel(Parcel in) {
-                    return new Subtitle(in);
-                }
-
-                @Override
-                public Subtitle[] newArray(int size) {
-                    return new Subtitle[size];
-                }
-            };
-
-            @Override
-            public String toString() {
-                return "Subtitle{" +
-                        "min=" + min +
-                        ", max=" + max +
-                        ", first=" + first +
-                        ", chance=" + chance +
-                        ", ttl=" + ttl +
-                        ", firstChance=" + firstChance +
-                        ", interval=" + interval +
-                        '}';
-            }
         }
 
         static class Chance implements Parcelable, Serializable {

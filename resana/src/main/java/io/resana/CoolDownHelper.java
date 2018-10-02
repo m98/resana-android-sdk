@@ -2,7 +2,35 @@ package io.resana;
 
 import android.content.Context;
 
-import static io.resana.ResanaPreferences.*;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_INTERVAL;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_TTL;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE_INTERVAL;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_SPLASH_COOL_DOWN_TTL;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE_INTERVAL;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_MAX;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_MIN;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_TS;
+import static io.resana.ResanaPreferences.PREF_CTRL_SUBTITLE_COOL_DOWN_TTL;
+import static io.resana.ResanaPreferences.getFloat;
+import static io.resana.ResanaPreferences.getInt;
+import static io.resana.ResanaPreferences.getLong;
+import static io.resana.ResanaPreferences.getPrefs;
+import static io.resana.ResanaPreferences.remove;
+import static io.resana.ResanaPreferences.saveFloat;
+import static io.resana.ResanaPreferences.saveInt;
+import static io.resana.ResanaPreferences.saveLong;
 
 class CoolDownHelper {
     private static final int DEFAULT_SUBTITLE_COOL_DOWN_MAX = 35;
@@ -140,7 +168,6 @@ class CoolDownHelper {
 
     static void handleCoolDownCtrl(Context context, ControlDto ctrl) {
         final ControlDto.CoolDownParams.Chance splash = ((ControlDto.CoolDownParams) ctrl.params).splash;
-        final ControlDto.CoolDownParams.Subtitle subtitle = ((ControlDto.CoolDownParams) ctrl.params).subtitle;
         final ControlDto.CoolDownParams.Chance nativeAd = ((ControlDto.CoolDownParams) ctrl.params).nativeAd;
         if (splash != null) {
             saveLong(context, PREF_CTRL_SPLASH_COOL_DOWN_TS, System.currentTimeMillis());
@@ -148,16 +175,6 @@ class CoolDownHelper {
             saveInt(context, PREF_CTRL_SPLASH_COOL_DOWN_TTL, splash.ttl);
             saveFloat(context, PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE, (float) splash.first);
             saveInt(context, PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE_INTERVAL, splash.interval);
-        }
-        if (subtitle != null) {
-            saveLong(context, PREF_CTRL_SUBTITLE_COOL_DOWN_TS, System.currentTimeMillis());
-            saveInt(context, PREF_CTRL_SUBTITLE_COOL_DOWN_MIN, subtitle.min);
-            saveInt(context, PREF_CTRL_SUBTITLE_COOL_DOWN_MAX, subtitle.max);
-            saveInt(context, PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST, subtitle.first);
-            saveFloat(context, PREF_CTRL_SUBTITLE_COOL_DOWN_CHANCE, (float) subtitle.chance);
-            saveInt(context, PREF_CTRL_SUBTITLE_COOL_DOWN_TTL, subtitle.ttl);
-            saveFloat(context, PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE, (float) subtitle.firstChance);
-            saveInt(context, PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE_INTERVAL, subtitle.interval);
         }
         if (nativeAd != null) {
             saveLong(context, PREF_CTRL_NATIVE_COOL_DOWN_TS, System.currentTimeMillis());
