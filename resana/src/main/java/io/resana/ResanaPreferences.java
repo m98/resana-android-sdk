@@ -12,6 +12,8 @@ class ResanaPreferences {
     static final String PREF_HRZ_VISUAL_TYPE = "PREF_HRZ_VISUAL_TYPE";
     static final String PREF_ORG_VISUAL_TYPE = "PREF_ORG_VISUAL_TYPE";
 
+    static final String PREF_DOWNLOADING_APK = "PREF_DOWNLOADING_APK";
+
 
     static final String PREF_LOG_LEVEL = "PREF_LOG_LEVEL";
     static final String PREF_CONTINUOUS_CLOSES = "PREF_CONTINUOUS_CLOSES";

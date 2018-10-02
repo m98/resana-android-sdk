@@ -1,10 +1,10 @@
 package io.resana;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -140,13 +140,15 @@ class NativeAdProvider {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
         if (!isLoadingCacheAds) {
             for (Ad item : items) {
-                downloadAdFiles(item);
-                if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
-                    ads.get().add(item);
-                    ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+                if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
+                    downloadAdFiles(item);
+                    if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
+                        ads.get().add(item);
+                        ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+                    }
                 }
-                ads.needsPersist();
             }
+            ads.needsPersist();
             ads.persistIfNeeded();
             separateAds();
         }
@@ -266,6 +268,8 @@ class NativeAdProvider {
             ResanaLog.d(TAG, "get: Native dismissRestTime");
             return null;
         }
+        if (isLoadingCacheAds)
+            return null;
         final Ad ad = internalGetAd(hasTitle, zone);
         if (ad != null) {
             final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
@@ -453,9 +457,17 @@ class NativeAdProvider {
         nativeLandingView.show();
     }
 
-    void handleLandingClick(Context context, NativeAd ad) {
-        ResanaInternal.getInstance(context, null).onNativeAdLandingClicked(ad);
-        if (ad.hasIntent()) {
+    void handleLandingClick(final Context context, final NativeAd ad) {
+        if (ResanaInternal.instance == null)
+            return;
+        if (ApkManager.getInstance(context).isApkDownloading(context, ad)) {
+            Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        ResanaInternal.instance.onNativeAdLandingClicked(ad);
+        if (ad.hasApk()) {
+            ApkManager.getInstance(context).downloadAndInstallApk(ad);
+        } else if (ad.hasIntent()) {
             Intent intent = ad.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

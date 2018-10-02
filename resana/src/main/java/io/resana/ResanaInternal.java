@@ -26,9 +26,9 @@ import static io.resana.ResanaPreferences.saveLong;
 
 class ResanaInternal {
     private static final String TAG = ResanaLog.TAG_PREF + "Resana";
-    static final String SDK_VERSION = "6.3.1";
-    static final int SDK_VERSION_NUM = 16;
-    static final int DB_VERSION = 6;
+    static final String SDK_VERSION = "7.1.1";
+    static final int SDK_VERSION_NUM = 17;
+    static final int DB_VERSION = 7;
 
     static final String DEFAULT_RESANA_INFO_TEXT =
             "تبلیغات رسانا" + "\n"
@@ -52,6 +52,36 @@ class ResanaInternal {
     List<DismissOption> dismissOptions;
     private long lastDismissTime;
     private int dismissRestDuration;
+
+    private ResanaInternal(Context context, String[] tags) {
+        this.appContext = context.getApplicationContext();
+        this.tags = tags;
+        loadDismissOptions();
+        GoalActionMeter.getInstance(context);
+        AdVersionKeeper.init(context);
+        ApkManager.getInstance(context);
+        media = AdViewUtil.getMediaId(appContext);
+        if (media == null)
+            throw new IllegalArgumentException("ResanaMediaId is not defined properly");
+        if (ResanaConfig.gettingNativeAds(context))
+            nativeProvider = new NativeAdProvider(context);
+        if (ResanaConfig.gettingSplashAds(context))
+            splashProvider = new SplashAdProvider(context);
+        FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
+        FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
+        NetworkHelper.checkUserAgent(appContext);
+        start();
+    }
+
+    private void start() {
+        ResanaLog.v(TAG, "Start");
+        adReceiver = new AdReceiver();
+        Befrest befrest = BefrestFactory.getInstance(appContext);
+        befrest.registerPushReceiver(adReceiver);
+        befrest.init(media, tags).start();
+        saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
+        DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
+    }
 
     static ResanaInternal getInstance(Context context, String[] tags) {
         ResanaInternal localInstance = instance;
@@ -114,36 +144,6 @@ class ResanaInternal {
         if (splashProvider == null)
             return false;
         return splashProvider.isAdAvailable();
-    }
-
-    private ResanaInternal(Context context, String[] tags) {
-        this.appContext = context.getApplicationContext();
-        this.tags = tags;
-        loadDismissOptions();
-        GoalActionMeter.getInstance(context);
-        AdVersionKeeper.init(context);
-        ApkManager.getInstance(context);
-        media = AdViewUtil.getMediaId(appContext);
-        if (media == null)
-            throw new IllegalArgumentException("ResanaMediaId is not defined properly");
-        if (ResanaConfig.gettingNativeAds(context))
-            nativeProvider = new NativeAdProvider(context);
-        if (ResanaConfig.gettingSplashAds(context))
-            splashProvider = new SplashAdProvider(context);
-        FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
-        FileManager.getInstance(appContext).deleteOldFiles();
-        NetworkHelper.checkUserAgent(appContext);
-        start();
-    }
-
-    private void start() {
-        ResanaLog.v(TAG, "Start");
-        adReceiver = new AdReceiver();
-        Befrest befrest = BefrestFactory.getInstance(appContext);
-        befrest.registerPushReceiver(adReceiver);
-        befrest.init(media, tags).start();
-        saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
-        DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
     }
 
     private void handleControlMessage(Ad msg) {

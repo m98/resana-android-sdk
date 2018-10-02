@@ -138,13 +138,15 @@ class SplashAdProvider {
     void newAdsReceived(List<Ad> items) {
         ResanaLog.d(TAG, "newAdsReceived: ");
         if (!isLoadingCachedAds) {
-            for (Ad item : items)
-                if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
-                    ads.get().add(item);
-                    ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+            for (Ad item : items) {
+                if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
+                    if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
+                        ads.get().add(item);
+                        ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
+                    }
                 }
+            }
             ads.needsPersist();
-
             ads.persistIfNeeded();
             updateAdQueues();
         }

@@ -55,6 +55,9 @@ abstract class AdDto implements Parcelable, Serializable {
     @SerializedName("report")
     ReportDto report;
 
+    @SerializedName("apk")
+    ApkDto apk;
+
     @SerializedName("rl")
     ResanaLabelDto resanaLabel;
 
@@ -89,6 +92,7 @@ abstract class AdDto implements Parcelable, Serializable {
         intent = in.readString();
         landing = in.readParcelable(LandingDto.class.getClassLoader());
         report = in.readParcelable(ReportDto.class.getClassLoader());
+        apk = in.readParcelable(ApkDto.class.getClassLoader());
         resanaLabel = in.readParcelable(ResanaLabelDto.class.getClassLoader());
         simulateClicks = in.createTypedArray(SimulateClickDto.CREATOR);
         maxView = in.readInt();
@@ -113,6 +117,7 @@ abstract class AdDto implements Parcelable, Serializable {
         dest.writeString(intent);
         dest.writeParcelable(landing, flags);
         dest.writeParcelable(report, flags);
+        dest.writeParcelable(apk, flags);
         dest.writeParcelable(resanaLabel, flags);
         dest.writeTypedArray(simulateClicks, flags);
         dest.writeInt(maxView);
