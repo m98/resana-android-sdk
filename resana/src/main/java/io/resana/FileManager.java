@@ -16,10 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static io.resana.ResanaInternal.DB_VERSION;
 import static io.resana.ResanaPreferences.PREF_DELETE_FILES_TIME;
+import static io.resana.ResanaPreferences.PREF_DOWNLOADING_APK;
 import static io.resana.ResanaPreferences.PREF_SHOULD_CLEANUP_OLD_FILES;
 import static io.resana.ResanaPreferences.getBoolean;
 import static io.resana.ResanaPreferences.getLong;
@@ -102,7 +101,7 @@ class FileManager {
         }
     }
 
-    void deleteOldFiles() {
+    void deleteOldAndCorruptedFiles() {
         List<FileSpec> toDelete = new ArrayList<>();
         File resanaCacheDir = StorageManager.getCacheDir(appContext);
         File resanaApkDir = StorageManager.getApksDir(appContext);
@@ -110,18 +109,22 @@ class FileManager {
         if (fileNames == null)
             return;
         long deleteTime = getTimeToDeleteOldFiles();
-        for (int i = 0; i < fileNames.length; i++) {
-            File f = new File(resanaCacheDir, fileNames[i]);
-            if ((System.currentTimeMillis() - f.lastModified()) >= deleteTime)
-                toDelete.add(new FileSpec(fileNames[i]));
+        for (String fileName1 : fileNames) {
+            File f = new File(resanaCacheDir, fileName1);
+            if (getBoolean(appContext, f.getName() + PREF_DOWNLOADING_APK, false)
+                    || (System.currentTimeMillis() - f.lastModified()) >= deleteTime) {
+                toDelete.add(new FileSpec(fileName1));
+            }
         }
         fileNames = resanaApkDir.list();
         if (fileNames == null)
             return;
-        for (int i = 0; i < fileNames.length; i++) {
-            File f = new File(resanaApkDir, fileNames[i]);
-            if ((System.currentTimeMillis() - f.lastModified()) >= deleteTime)
-                toDelete.add(new FileSpec(FileSpec.DIR_TYPE_APKS, fileNames[i]));
+        for (String fileName : fileNames) {
+            File f = new File(resanaApkDir, fileName);
+            if (getBoolean(appContext, f.getName() + PREF_DOWNLOADING_APK, false)
+                    || (System.currentTimeMillis() - f.lastModified()) >= deleteTime) {
+                toDelete.add(new FileSpec(FileSpec.DIR_TYPE_APKS, fileName));
+            }
         }
         deleteFiles(toDelete, null);
     }
@@ -434,6 +437,7 @@ class FileManager {
                     return true;
 
                 connection = NetworkHelper.openConnection(f.url);
+                String content_length = connection.getHeaderField("content-length");
                 if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                     return false; // expect HTTP 200 OK, so we don't mistakenly save error report instead of the file
                 }
@@ -443,29 +447,15 @@ class FileManager {
                 is = connection.getInputStream();
                 fos = new FileOutputStream(tempFile != null ? tempFile : file);
 
-                MessageDigest md5checksum = null;
-                if (f.checksum != null)
-                    try {
-                        md5checksum = MessageDigest.getInstance("MD5");
-                    } catch (Exception e) {
-                        ResanaLog.w(TAG, "checking file checksum ignored because of a problem", e);
-                    }
-
                 byte data[] = new byte[4096];
                 int count;
+                saveBoolean(appContext, file.getName() + PREF_DOWNLOADING_APK, true); // apk file is downloading
                 while ((count = is.read(data)) != -1) {
                     fos.write(data, 0, count);
-                    if (md5checksum != null)
-                        md5checksum.update(data, 0, count);
                 }
                 fos.flush();
-                boolean checksumOk = true;
-                if (md5checksum != null) {
-                    String checksum = new BigInteger(1, md5checksum.digest()).toString(16);
-                    checksumOk = f.checksum.equals(checksum);
-                    ResanaLog.d(TAG, "downloaded file checksum:" + checksum + (checksumOk ? " is OK" : " does not match source checksum:" + f.checksum));
-                }
-                if (checksumOk) {
+                saveBoolean(appContext, file.getName() + PREF_DOWNLOADING_APK, false); // apk file downloaded
+                if (String.valueOf(file.length()).equals(content_length)) {
                     if (tempFile != null) {
                         if (tempFile.renameTo(file))
                             return true;
@@ -473,6 +463,7 @@ class FileManager {
                         return true;
                     }
                 }
+
             } catch (Exception ignored) {
             } finally {
                 if (connection != null)
