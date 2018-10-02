@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collections;
@@ -462,22 +460,13 @@ class NativeAdProvider {
     void handleLandingClick(final Context context, final NativeAd ad) {
         if (ResanaInternal.instance == null)
             return;
+        if (ApkManager.getInstance(context).isApkDownloading(context, ad)) {
+            Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
+            return;
+        }
         ResanaInternal.instance.onNativeAdLandingClicked(ad);
         if (ad.hasApk()) {
-            Toast.makeText(context, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
-            FileManager.getInstance(context).downloadFile(new FileSpec(ad.getApkUrl(), FileSpec.DIR_TYPE_APKS, ad.getApkFileName()), false, new Delegate() {
-                @Override
-                void onFinish(boolean success, Object... args) {
-                    if (!success) {
-                        Toast.makeText(context, "مشکلی در آماده سازی برنامه به وجود آمده است", Toast.LENGTH_SHORT).show();
-                    }
-                    else if (success) {
-                        File apk = new FileManager.FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(context);
-                        Log.e(TAG, "onFinish: file: " + apk.getAbsolutePath());
-                        ApkManager.installApk(context, apk);
-                    }
-                }
-            });
+            ApkManager.getInstance(context).downloadAndInstallApk(ad);
         } else if (ad.hasIntent()) {
             Intent intent = ad.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
