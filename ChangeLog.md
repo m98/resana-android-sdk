@@ -2,7 +2,7 @@
 
 ## 7.3.0 STABLE
 * downloading and installing apk when clicking on ad.
-* deleting corrupte downloaded files.
+* deleting corrupt downloaded files.
 * some bugs fixed.
 * SDK_VERSION_NUM = 17
 * DB_VERSION = 7
