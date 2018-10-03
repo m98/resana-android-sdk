@@ -42,14 +42,30 @@ add the following codes to your manifest file
 Initialize Resana in a page you want to show ads with the following code. it is recommended to initialize Resana at the beginning of your application. usually in application class. <br />
 
 ```ruby
-Resana resana = Resana.create(applicationContext, null, Resana.LOG_LEVEL_VERBOSE);
+Resana resana = Resana.create(applicationContext, Resana.LOG_LEVEL_VERBOSE, resanaConfig);
 ```
 
+resanaCongig is configuration of resana and should be implemented like this:
+
+```ruby
+ResanaConfig resanaConfig = new ResanaConfig(ResanaConfig.AdTypes[], ResanaConfig.VisualTypes[]);
+```
+
+first argument of this class is an array of ads you want to use and second is the array of visual types you want.
+
+* ResanaConfig.AdType.**NATIVE**: native ads
+* ResanaConfig.AdType.**SPLASH**: splash ads
+* ResanaConfig.VisualType.**SQUARE**: square visual of ad
+* ResanaConfig.VisualType.**HORIZONTAL**: horizental visual of ad
+* ResanaConfig.VisualType.**OROGINAL**: original visual of ad
+
 third argument of this method is Resana log level.
-* LOG_LEVEL_VERBOSE: Resana will log every thing.
-* LOG_LEVEL_DEBUG: Resana will only log debug information.
-* LOG_LEVEL_ERROR: Resana will only log errors.
-* LOG_LEVEL_NO_LOG: Resana will not log anything.
+
+* **LOG_LEVEL_VERBOSE**: Resana will log every thing.
+* **LOG_LEVEL_DEBUG**: Resana will only log debug information.
+* **LOG_LEVEL_ERROR**: Resana will only log errors.
+* **LOG_LEVEL_NO_LOG**: Resana will not log anything.
+
 <br />
 for disabling Resana you can use:
 
