@@ -15,4 +15,20 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep public class *
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.examples.android.model.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+-keep public class io.resana.Resana { public *; }
+-keep public class io.resana.ResanaConfig { public *; }
+-keep public class io.resana.NativeAd { public *; }
+-keep public class io.resana.NativeAd$* { public *; }
+-keep public class io.resana.SplashAdView { public *; }
+-keep public class io.resana.SplashAdView$* { public *; }
+-keep public class io.resana.DismissOption { public *; }
+
+-keep class io.resana.VisualDto { *; }
