@@ -16,9 +16,6 @@
 
 package io.resana;
 
-import android.animation.ValueAnimator;
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -27,26 +24,16 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -138,7 +125,7 @@ class AdViewUtil {
         final DisplayMetrics display = Resources.getSystem().getDisplayMetrics();
         final int w = display.widthPixels;
         final int h = display.heightPixels;
-        return imgUrl /*+ "/resize/" + w + "x" + h*/;
+        return imgUrl + "/resize/" + w + "x" + h;
     }
 
     static int getResanaLabelMaxWidth() {

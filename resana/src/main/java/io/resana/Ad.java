@@ -229,18 +229,18 @@ final class Ad implements Parcelable, Serializable {
                 int index = indexes.get(i);
                 VisualDto v = ((NativeDto) data).visuals.get(index);
                 if (ResanaConfig.gettingHrzVisual(c)) {
-                    FileSpec hrzFile = new FileSpec(v.hrz.url, v.hrz.getFileName());
-                    hrzFile.setChecksum(v.hrz.checksum);
+                    String url = AdViewUtil.getResizedImageUrl(v.hrz.url);
+                    FileSpec hrzFile = new FileSpec(url, v.hrz.getFileName());
                     files.add(hrzFile);
                 }
                 if (ResanaConfig.gettingOrgVisual(c)) {
-                    FileSpec orgFile = new FileSpec(v.org.url, v.org.getFileName());
-                    orgFile.setChecksum(v.org.checksum);
+                    String url = AdViewUtil.getResizedImageUrl(v.org.url);
+                    FileSpec orgFile = new FileSpec(url, v.org.getFileName());
                     files.add(orgFile);
                 }
                 if (ResanaConfig.gettingSqVisual(c)) {
-                    FileSpec sqFile = new FileSpec(v.sq.url, v.sq.getFileName());
-                    sqFile.setChecksum(v.sq.checksum);
+                    String url = AdViewUtil.getResizedImageUrl(v.sq.url);
+                    FileSpec sqFile = new FileSpec(url, v.sq.getFileName());
                     files.add(sqFile);
                 }
             }
@@ -249,7 +249,6 @@ final class Ad implements Parcelable, Serializable {
             files.add(new FileSpec(getImgUrl(), getSplashImageFileName()));
         if (hasLanding()) {
             FileSpec landingFile = new FileSpec(getLandingImageUrl(), getLandingImageFileName());
-            landingFile.checksum = data.landing.checksum;
             files.add(landingFile);
         }
         if (hasCustomLabel() && !"none".equals(getLabelUrl(c)))
