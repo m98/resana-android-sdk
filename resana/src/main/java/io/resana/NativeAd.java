@@ -206,12 +206,12 @@ public class NativeAd {
     public class Visual {
         Landing orgVisual;
         Landing sqVisual;
-        Landing hrzLanding;
+        Landing hrzVisual;
 
         Visual(VisualDto visualDto) {
             this.orgVisual = new Landing(visualDto.org);
             this.sqVisual = new Landing(visualDto.sq);
-            this.hrzLanding = new Landing(visualDto.hrz);
+            this.hrzVisual = new Landing(visualDto.hrz);
         }
 
         public Landing getOrgVisual() {
@@ -222,8 +222,8 @@ public class NativeAd {
             return sqVisual;
         }
 
-        public Landing getHrzLanding() {
-            return hrzLanding;
+        public Landing getHrzVisual() {
+            return hrzVisual;
         }
     }
 
