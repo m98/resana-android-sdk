@@ -56,6 +56,14 @@ public class Resana {
         return create(context, tags, LOG_LEVEL_VERBOSE, resanaConfig);
     }
 
+    public static Resana create(Context context, ResanaConfig resanaConfig) {
+        return create(context, null, LOG_LEVEL_VERBOSE, resanaConfig);
+    }
+
+    public static Resana create(Context context, int logLevel, ResanaConfig resanaConfig) {
+        return create(context, null, logLevel, resanaConfig);
+    }
+
     public void release() {
         if (references.remove(this)) {
             if (references.size() == 0)
