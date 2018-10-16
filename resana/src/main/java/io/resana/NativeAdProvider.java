@@ -451,6 +451,7 @@ class NativeAdProvider {
             @Override
             public void landingActionClicked() {
                 handleLandingClick(context, ad);
+                ResanaInternal.instance.onNativeAdLandingClicked(ad);
                 nativeLandingView.dismiss();
             }
         });
@@ -464,7 +465,6 @@ class NativeAdProvider {
             Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
             return;
         }
-        ResanaInternal.instance.onNativeAdLandingClicked(ad);
         if (ad.hasApk()) {
             ApkManager.getInstance(context).downloadAndInstallApk(ad);
         } else if (ad.hasIntent()) {
