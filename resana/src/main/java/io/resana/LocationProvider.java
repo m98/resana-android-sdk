@@ -30,6 +30,17 @@ public class LocationProvider implements LocationListener {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    void start() {
+        startLocationIfPossible();
+    }
+
+    void stop() {
+        delegate = null;
+        finishLocating();
+        handler.removeCallbacks(finishLocating);
+        handler.removeCallbacks(startLocating);
+    }
+
     private void startLocationIfPossible() {
         if (canGetLocation())
             startLocating();
