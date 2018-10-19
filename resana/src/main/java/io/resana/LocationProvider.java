@@ -1,6 +1,8 @@
 package io.resana;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,6 +30,13 @@ public class LocationProvider implements LocationListener {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    private void startLocationIfPossible() {
+        if (canGetLocation())
+            startLocating();
+        else
+            handler.postDelayed(startLocating, TWO_MINUTES);
+    }
+
     private void startLocating() {
         currLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 500, this);
@@ -38,6 +47,14 @@ public class LocationProvider implements LocationListener {
         if (locationManager != null)
             locationManager.removeUpdates(this);
         locationManager = null;
+    }
+
+    private boolean canGetLocation() {
+        return hasLocationPermission() && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    private boolean hasLocationPermission() {
+        return appContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -72,7 +89,7 @@ public class LocationProvider implements LocationListener {
 
         @Override
         void run(LocationProvider object) {
-            object.startLocating();
+            object.startLocationIfPossible();
         }
     }
 
