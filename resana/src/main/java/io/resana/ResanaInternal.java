@@ -95,6 +95,10 @@ class ResanaInternal implements LocationProvider.Delegate {
     public void onLocationChanged(Location location, boolean isFinal) {
         if (instance == null) //instance in released
             return;
+        lastLocation = location;
+        final Befrest befrest = BefrestFactory.getInstance(appContext);
+        befrest.init(media, tags, lastLocation);
+        befrest.start();
     }
 
     static ResanaInternal getInstance(Context context, String[] tags) {
