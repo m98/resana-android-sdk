@@ -67,8 +67,6 @@ final class Ad implements Parcelable, Serializable {
     private AdDto parseAdDto(String raw, JSONObject jo) throws JSONException {
         final int type = jo.getInt("type");
         switch (type) {
-            case AdDto.AD_TYPE_SUBTITLE:
-                return DtoParser.parse(raw, SubtitleDto.class);
             case AdDto.AD_TYPE_SPLASH:
                 return DtoParser.parse(raw, SplashDto.class);
             case AdDto.AD_TYPE_NATIVE:
@@ -151,17 +149,13 @@ final class Ad implements Parcelable, Serializable {
     }
 
     String getImgUrl() {
-        if (getType() == AdDto.AD_TYPE_SUBTITLE)
-            return ((SubtitleDto) data).pic;
-        else if (getType() == AdDto.AD_TYPE_SPLASH)
+        if (getType() == AdDto.AD_TYPE_SPLASH)
             return AdViewUtil.getResizedImageUrl(((SplashDto) data).pic);
         return null;
     }
 
     String getLandingImageUrl() {
-        if (getType() == AdDto.AD_TYPE_SUBTITLE)
-            return AdViewUtil.getResizedImageUrl(((SubtitleDto) data).landing.url);
-        else if (getType() == AdDto.AD_TYPE_SPLASH)
+        if (getType() == AdDto.AD_TYPE_SPLASH)
             return AdViewUtil.getResizedImageUrl(((SplashDto) data).landing.url);
         else if (getType() == AdDto.AD_TYPE_NATIVE)
             return AdViewUtil.getResizedImageUrl(((NativeDto) data).landing.url);
@@ -259,19 +253,6 @@ final class Ad implements Parcelable, Serializable {
     //Splash
     String getSplashImageFileName() {
         return SPLASH_FILE_NAME_PREFIX + getId();
-    }
-
-    //Subtitle
-    String getSubtitleText() {
-        return ((SubtitleDto) data).m;
-    }
-
-    int getSubtitleTextColor() {
-        return AdViewUtil.parseHexadecimalColor(((SubtitleDto) data).fontColor, Color.RED);
-    }
-
-    String getSubtitleLogoUrl() {
-        return ((SubtitleDto) data).logo;
     }
 
     int getSubtitleProgressColor() {
