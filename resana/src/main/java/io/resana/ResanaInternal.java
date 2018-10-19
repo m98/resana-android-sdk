@@ -123,6 +123,7 @@ class ResanaInternal implements LocationProvider.Delegate {
         }
         befrest.stop();
         saveSessionDuration();
+        locationProvider.stop();
         instance = null;
     }
 
