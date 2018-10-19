@@ -5,6 +5,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 
 public class LocationProvider implements LocationListener {
     private static final String TAG = "LocationProvider";
@@ -15,10 +16,28 @@ public class LocationProvider implements LocationListener {
     private LocationManager locationManager;
     private Location currLocation;
 
+    private Handler handler = new Handler();
+
+    private WeakRunnable<LocationProvider> startLocating = new StartLocating(this);
+
+    private WeakRunnable<LocationProvider> finishLocating = new FinishLocating(this);
+
     LocationProvider(Context context, Delegate  delegate) {
         this.appContext = context;
         this.delegate = delegate;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    private void startLocating() {
+        currLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 500, this);
+    }
+
+    private void finishLocating() {
+        ResanaLog.d(TAG, "finishCheckingLocation: ");
+        if (locationManager != null)
+            locationManager.removeUpdates(this);
+        locationManager = null;
     }
 
     @Override
@@ -43,5 +62,28 @@ public class LocationProvider implements LocationListener {
 
     interface Delegate {
         void onLocationChanged(Location location, boolean isFinal);
+    }
+
+    private static class StartLocating extends WeakRunnable<LocationProvider> {
+
+        StartLocating(LocationProvider ref) {
+            super(ref);
+        }
+
+        @Override
+        void run(LocationProvider object) {
+            object.startLocating();
+        }
+    }
+
+    private static class FinishLocating extends WeakRunnable<LocationProvider> {
+        FinishLocating(LocationProvider ref) {
+            super(ref);
+        }
+
+        @Override
+        void run(LocationProvider object) {
+            object.finishLocating();
+        }
     }
 }
