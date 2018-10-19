@@ -68,24 +68,29 @@ public class LocationProvider implements LocationListener {
         return appContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public Location getCurrLocation() {
+        return currLocation;
+    }
+
     @Override
     public void onLocationChanged(Location location) {
-
+        ResanaLog.d(TAG, "onLocationChanged: " + location);
+        currLocation = location;
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        ResanaLog.d(TAG, "onStatusChanged() called with: provider = [" + provider + "], status = [" + status + "], extras = [" + extras + "]");
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        ResanaLog.d(TAG, "onProviderEnabled() called with: provider = [" + provider + "]");
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        ResanaLog.d(TAG, "onProviderDisabled() called with: provider = [" + provider + "]");
     }
 
     interface Delegate {
