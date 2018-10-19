@@ -35,8 +35,13 @@ import static io.resana.ResanaPreferences.PREF_CONNECT_ANOMALY_DATA_RECORDING_TI
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES;
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES_TYPES;
 import static io.resana.ResanaPreferences.PREF_LAST_SUCCESSFUL_CONNECT_TIME;
+import static io.resana.ResanaPreferences.PREF_LOC_ACU;
+import static io.resana.ResanaPreferences.PREF_LOC_LAT;
+import static io.resana.ResanaPreferences.PREF_LOC_LONG;
+import static io.resana.ResanaPreferences.PREF_LOC_TIME;
 import static io.resana.ResanaPreferences.PREF_MEDIA_ID;
 import static io.resana.ResanaPreferences.getPrefs;
+import static io.resana.ResanaPreferences.saveFloat;
 import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveLong;
 import static io.resana.ResanaPreferences.saveString;
@@ -83,7 +88,7 @@ final class BefrestImpl implements Befrest, BefrestInternal {
 
     private int reportedContinuousCloses;
     private String continuousClosesTypes;
-    
+
     @Override
     public Befrest init(String media, String[] categories, Location location) {
         String newCats = getFormedCategoryString(categories);
@@ -93,8 +98,19 @@ final class BefrestImpl implements Befrest, BefrestInternal {
             clearTempData();
             saveString(context, PREF_MEDIA_ID, media);
             saveString(context, PREF_CATEGORIES, cats);
+            setLocation(location);
         }
         return this;
+    }
+
+    private void setLocation(Location location) {
+        if (location == null)
+            return;
+        //todo handling location changed here
+        saveFloat(context, PREF_LOC_LAT, (float) location.getLatitude());
+        saveFloat(context, PREF_LOC_LONG, (float) location.getLongitude());
+        saveFloat(context, PREF_LOC_ACU, location.getAccuracy());
+        saveLong(context, PREF_LOC_TIME, location.getTime());
     }
 
     private String getFormedCategoryString(String[] categories) {
