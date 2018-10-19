@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -36,13 +35,8 @@ import static io.resana.ResanaPreferences.PREF_CONNECT_ANOMALY_DATA_RECORDING_TI
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES;
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES_TYPES;
 import static io.resana.ResanaPreferences.PREF_LAST_SUCCESSFUL_CONNECT_TIME;
-import static io.resana.ResanaPreferences.PREF_LOC_ACU;
-import static io.resana.ResanaPreferences.PREF_LOC_LAT;
-import static io.resana.ResanaPreferences.PREF_LOC_LONG;
-import static io.resana.ResanaPreferences.PREF_LOC_TIME;
 import static io.resana.ResanaPreferences.PREF_MEDIA_ID;
 import static io.resana.ResanaPreferences.getPrefs;
-import static io.resana.ResanaPreferences.saveFloat;
 import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveLong;
 import static io.resana.ResanaPreferences.saveString;
@@ -91,7 +85,7 @@ final class BefrestImpl implements Befrest, BefrestInternal {
     private String continuousClosesTypes;
     
     @Override
-    public Befrest init(String media, String[] categories) {
+    public Befrest init(String media, String[] categories, Location location) {
         String newCats = getFormedCategoryString(categories);
         if (!media.equals(this.media) || !newCats.equals(cats)) {
             this.media = media;

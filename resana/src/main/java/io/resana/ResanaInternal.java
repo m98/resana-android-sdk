@@ -1,6 +1,7 @@
 package io.resana;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.Handler;
 
 import com.google.gson.Gson;
@@ -24,7 +25,7 @@ import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.getPrefs;
 import static io.resana.ResanaPreferences.saveLong;
 
-class ResanaInternal {
+class ResanaInternal implements LocationProvider.Delegate {
     private static final String TAG = ResanaLog.TAG_PREF + "Resana";
     static final String SDK_VERSION = "7.3.0";
     static final int SDK_VERSION_NUM = 17;
@@ -47,6 +48,9 @@ class ResanaInternal {
 
     private NativeAdProvider nativeProvider;
     private SplashAdProvider splashProvider;
+
+    private LocationProvider locationProvider;
+    private Location lastLocation;
 
     boolean adsAreDismissible;
     List<DismissOption> dismissOptions;
@@ -75,12 +79,22 @@ class ResanaInternal {
 
     private void start() {
         ResanaLog.v(TAG, "Start");
+        locationProvider = new LocationProvider(appContext, this);
+        locationProvider.start();
+        lastLocation = locationProvider.getCurrLocation();
         adReceiver = new AdReceiver();
         Befrest befrest = BefrestFactory.getInstance(appContext);
         befrest.registerPushReceiver(adReceiver);
-        befrest.init(media, tags).start();
+        befrest.init(media, tags, lastLocation).start();
         saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
         DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location, boolean isFinal) {
+        if (instance == null) //instance in released
+            return;
     }
 
     static ResanaInternal getInstance(Context context, String[] tags) {

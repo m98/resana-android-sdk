@@ -44,7 +44,7 @@ interface Befrest {
      */
     int LOG_LEVEL_NO_LOG = 100;
 
-    Befrest init(String media, String[] category);
+    Befrest init(String media, String[] category, Location location);
     void start();
     void stop();
     void sendMessage(String msg);
