@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class Resana {
     ResanaInternal instance;
+    private static boolean initCalled = false;
 
     private static Set<Resana> references = Collections.synchronizedSet(new HashSet<Resana>());
 
@@ -42,26 +43,32 @@ public class Resana {
         this.instance = resanaInternal;
     }
 
-    public static Resana create(Context context, String[] tags, int logLevel, ResanaConfig resanaConfig) {
+    public static void init(Context context, ResanaConfig resanaConfig) {
         if (resanaConfig == null)
             throw new IllegalArgumentException("ResanaConfig cannot be null");
         ResanaConfig.saveConfigs(context, resanaConfig);
+        initCalled = true;
+    }
+
+    public static Resana create(Context context, String[] tags, int logLevel) {
+        if (!initCalled)
+            throw new IllegalArgumentException("Call Resana.init first");
         ResanaLog.setLogLevel(logLevel);
         final Resana resana = new Resana(ResanaInternal.getInstance(context, tags));
         references.add(resana);
         return resana;
     }
 
-    public static Resana create(Context context, String[] tags, ResanaConfig resanaConfig) {
-        return create(context, tags, LOG_LEVEL_VERBOSE, resanaConfig);
+    public static Resana create(Context context, String[] tags) {
+        return create(context, tags, LOG_LEVEL_VERBOSE);
     }
 
-    public static Resana create(Context context, ResanaConfig resanaConfig) {
-        return create(context, null, LOG_LEVEL_VERBOSE, resanaConfig);
+    public static Resana create(Context context) {
+        return create(context, null, LOG_LEVEL_VERBOSE);
     }
 
-    public static Resana create(Context context, int logLevel, ResanaConfig resanaConfig) {
-        return create(context, null, logLevel, resanaConfig);
+    public static Resana create(Context context, int logLevel) {
+        return create(context, null, logLevel);
     }
 
     public void release() {
