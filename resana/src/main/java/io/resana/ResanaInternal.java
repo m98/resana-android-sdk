@@ -227,6 +227,8 @@ class ResanaInternal {
     }
 
     void onNativeAdRendered(NativeAd ad) {
+        if (nativeProvider == null || ad == null)
+            return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_ACK);
         sendToServer(nativeProvider.getRenderAck(ad.getSecretKey()));
         AdVersionKeeper.adRendered(ad.getId() + "");
@@ -240,7 +242,7 @@ class ResanaInternal {
     }
 
     void onNativeAdClicked(Context context, NativeAd ad) {
-        if (nativeProvider == null)
+        if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
@@ -262,14 +264,14 @@ class ResanaInternal {
     }
 
     void onNativeAdLandingClicked(NativeAd ad) {
-        if (nativeProvider == null)
+        if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_LANDING_CLICK);
         sendToServer(nativeProvider.getLandingAck(ad.getSecretKey()));
     }
 
     void onNativeAdLongClick(Context context, NativeAd ad) {
-        if (nativeProvider == null)
+        if (nativeProvider == null || ad == null)
             return;
         if (adsAreDismissible)
             nativeProvider.showDismissOptions(context, ad, dismissOptions, instance);
