@@ -4,12 +4,19 @@ package io.resana;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 class VisualDto implements Parcelable, Serializable {
 
+    @SerializedName("org")
     LandingDto org;
+
+    @SerializedName("sq")
     LandingDto sq;
+
+    @SerializedName("hrz")
     LandingDto hrz;
 
     protected VisualDto(Parcel in) {
