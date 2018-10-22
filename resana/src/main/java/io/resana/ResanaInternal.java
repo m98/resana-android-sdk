@@ -26,9 +26,9 @@ import static io.resana.ResanaPreferences.saveLong;
 
 class ResanaInternal {
     private static final String TAG = ResanaLog.TAG_PREF + "Resana";
-    static final String SDK_VERSION = "7.3.0";
-    static final int SDK_VERSION_NUM = 17;
-    static final int DB_VERSION = 7;
+    static final String SDK_VERSION = "7.4.0";
+    static final int SDK_VERSION_NUM = 18;
+    static final int DB_VERSION = 8;
 
     static final String DEFAULT_RESANA_INFO_TEXT =
             "تبلیغات رسانا" + "\n"
