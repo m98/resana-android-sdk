@@ -30,5 +30,3 @@
 -keep public class io.resana.SplashAdView { public *; }
 -keep public class io.resana.SplashAdView$* { public *; }
 -keep public class io.resana.DismissOption { public *; }
-
--keep class io.resana.VisualDto { *; }
