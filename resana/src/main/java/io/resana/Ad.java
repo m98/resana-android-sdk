@@ -19,7 +19,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -91,7 +90,7 @@ final class Ad implements Parcelable, Serializable {
     }
 
     boolean isInvalid() {
-        Log.e(TAG, "isInvalid: outDated: " + isOutDated() + " isOld: " + AdVersionKeeper.isOldVersion(this) +
+        ResanaLog.e(TAG, "isInvalid: outDated: " + isOutDated() + " isOld: " + AdVersionKeeper.isOldVersion(this) +
                 " renderEnough: " + AdVersionKeeper.isRenderedEnough(this));
         return isOutDated()
                 || AdVersionKeeper.isOldVersion(this)
