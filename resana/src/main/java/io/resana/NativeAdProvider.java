@@ -75,7 +75,14 @@ class NativeAdProvider {
         }
     }
 
+    static boolean isBlockedZone(String zone) {
+        if (blockedZones == null || zone == null || zone.equals(""))
+            return false;
+        return Arrays.asList(blockedZones).contains(zone);
+    }
+
     private void persistBlockedZones() {
+        ResanaLog.d(TAG, "persistBlockedZones: ");
         if (blockedZones == null || blockedZones.length == 0)
             ResanaPreferences.remove(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES);
         else {
@@ -86,20 +93,6 @@ class NativeAdProvider {
             }
             ResanaPreferences.saveString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, s);
         }
-    }
-
-    private void loadBlockedZones() {
-        ResanaLog.d(TAG, "loadBlockedZones: loading blocked zones");
-        String s = ResanaPreferences.getString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, null);
-        if (s != null && s.length() > 0) {
-            String[] zones = s.split(";");
-            blockedZones = new String[zones.length - 1];
-            for (int i = 0; i < zones.length - 1; i++) {
-                blockedZones[i] = zones[i];
-            }
-        } else
-            blockedZones = null;
-
     }
 
     void handleBlockedZones(ControlDto ctrl) {
@@ -263,23 +256,21 @@ class NativeAdProvider {
         return null;
     }
 
-    NativeAd getAd(boolean hasTitle, String zone) {
-        if (ResanaInternal.instance.isInDismissRestTime()) {
-            ResanaLog.d(TAG, "get: Native dismissRestTime");
-            return null;
+    private void loadBlockedZones() {
+        ResanaLog.d(TAG, "loadBlockedZones: ");
+        String s = ResanaPreferences.getString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, null);
+        if (s != null && s.length() > 0) {
+            String[] zones = s.split(";");
+            blockedZones = new String[zones.length];
+            for (int i = 0; i < zones.length; i++) {
+                blockedZones[i] = zones[i];
+                ResanaLog.d(TAG, "blockedZone: " + blockedZones[i]);
+            }
+        } else {
+            blockedZones = null;
+            ResanaLog.d(TAG, "loadBlockedZones: there is no block zone");
         }
-        if (isLoadingCacheAds)
-            return null;
-        final Ad ad = internalGetAd(hasTitle, zone);
-        if (ad != null) {
-            final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
-            final Acks acks = new Acks(ad);
-            waitingToBeRenderedByClient.put(nativeAd.getSecretKey(), acks);
-            GoalActionMeter.getInstance(appContext).persistReport(nativeAd.getSecretKey(), ad.data.report);
-            ClickSimulator.getInstance(appContext).persistSimulateClicks(nativeAd.getSecretKey(), ad.data.simulateClicks);
-            return nativeAd;
-        }
-        return null;
+
     }
 
     private Ad internalGetAd(boolean hasTitle, String zone) {
@@ -438,6 +429,30 @@ class NativeAdProvider {
                 return true;
         }
         return false;
+    }
+
+    NativeAd getAd(boolean hasTitle, String zone) {
+        if (ResanaInternal.instance.isInDismissRestTime()) {
+            ResanaLog.d(TAG, "get: Native dismissRestTime");
+            return null;
+        }
+        if (isLoadingCacheAds)
+            return null;
+
+        if (isBlockedZone(zone)) {
+            ResanaLog.e(TAG, "get: zone " + zone + " is blocked");
+            return null;
+        }
+        final Ad ad = internalGetAd(hasTitle, zone);
+        if (ad != null) {
+            final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
+            final Acks acks = new Acks(ad);
+            waitingToBeRenderedByClient.put(nativeAd.getSecretKey(), acks);
+            GoalActionMeter.getInstance(appContext).persistReport(nativeAd.getSecretKey(), ad.data.report);
+            ClickSimulator.getInstance(appContext).persistSimulateClicks(nativeAd.getSecretKey(), ad.data.simulateClicks);
+            return nativeAd;
+        }
+        return null;
     }
 
     void showLanding(final Context context, final NativeAd ad) {

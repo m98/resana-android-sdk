@@ -2,6 +2,7 @@ package io.resana;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -117,6 +118,7 @@ class ResanaInternal {
             ResanaLog.e(TAG, "You didn't mention native ads in resana config");
             return null;
         }
+        Log.e(TAG, "getNativeAd: " + zone);
         return nativeProvider.getAd(hasTitle, zone);
     }
 
@@ -147,7 +149,7 @@ class ResanaInternal {
     }
 
     private void handleControlMessage(Ad msg) {
-        for (ControlDto ctrl : msg.ctrls)
+        for (ControlDto ctrl : msg.ctrls) {
             if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {//TODO handle null pointer exeption here
                 if (splashProvider != null)
                     splashProvider.flushCache();
@@ -165,6 +167,7 @@ class ResanaInternal {
             } else if (ControlDto.CMD_LAST_MODIFIED_DATE.equals(ctrl.cmd)) {
                 saveLastModifiedDate(ctrl);
             }
+        }
     }
 
     private void handleResanaLabelCtrl(ControlDto ctrl) {

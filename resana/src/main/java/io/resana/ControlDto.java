@@ -64,7 +64,7 @@ class ControlDto implements Parcelable, Serializable {
         } else if (CMD_DISMISS_OPTIONS.equals(res.cmd)) {
             res.params = DismissOptionsParams.fromJson(jo.getJSONObject("params"));
         } else if (CMD_BLOCKED_ZONES.equals(res.cmd)) {
-            res.params = BlockedZonesParams.fromJsonArray(jo.getJSONArray("bz"));
+            res.params = BlockedZonesParams.fromJsonArray(jo.getJSONArray("params"));
         } else if (CMD_LAST_MODIFIED_DATE.equals(res.cmd)) {//todo should handle here
 //            res.params = LastModifiedDateParams.fromJson(jo.getJSONObject("lm"));
         } else
@@ -188,7 +188,7 @@ class ControlDto implements Parcelable, Serializable {
         @Override
         public String toString() {
             return "CoolDownParams{" +
-                    ", splash=" + splash +
+                    "splash=" + splash +
                     ", native=" + nativeAd +
                     "} ";
         }
@@ -430,6 +430,16 @@ class ControlDto implements Parcelable, Serializable {
                 return new BlockedZonesParams[size];
             }
         };
+
+        @Override
+        public String toString() {
+            String res =  "BlockZonesParams{";
+            for (int i = 0; i < zones.length; i++) {
+                res += " " + zones[i] + ",";
+            }
+            res += "}";
+            return res;
+        }
     }
 
     static class LastModifiedDateParams extends Params implements Serializable, Parcelable {
