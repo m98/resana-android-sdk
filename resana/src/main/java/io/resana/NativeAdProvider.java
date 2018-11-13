@@ -133,17 +133,11 @@ class NativeAdProvider {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
         if (!isLoadingCacheAds) {
             for (Ad item : items) {
+                ResanaLog.d(TAG, "newAdsReceived: ctl: " + item.data.ctl);
                 if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
                     downloadAdFiles(item);
-                    if (numberOfAdsInQueue(item.data.id) < item.data.ctl) {
-                        ads.get().add(item);
-                        ResanaLog.d(TAG, "newAdsReceived: adding item to ads. ads size: " + ads.get().size());
-                    }
                 }
             }
-            ads.needsPersist();
-            ads.persistIfNeeded();
-            separateAds();
         }
     }
 
@@ -164,23 +158,30 @@ class NativeAdProvider {
         FileManager.getInstance(appContext).downloadAdFiles(ad, new Delegate() {
             @Override
             void onFinish(boolean success, Object... args) {
-                //todo should find a better way for downloading ads assets in background
-                ResanaLog.d(TAG, "onFinish: downloading native ads file finishes. success " + success);
-                ResanaPreferences.saveBoolean(appContext, ad.getId() + "ddd", success);
-                ad.data.ts = "" + System.currentTimeMillis();
+                ResanaLog.d(TAG, "onFinish: downloading native ad files finishes. success " + success);
+                if (success) {
+                    if (numberOfAdsInQueue(ad.data.id) < ad.data.ctl) {
+                        ads.get().add(ad);
+                        ads.needsPersist();
+                        ads.persistIfNeeded();
+                        ResanaLog.d(TAG, "downloadAdFiles: adding item to ads. ads size: " + ads.get().size());
+                        separateAds();
+                    }
+                    ad.data.ts = "" + System.currentTimeMillis();
+                }
             }
         });
     }
 
     private void pruneAds() {
+        ResanaLog.d(TAG, "pruneAds: ");
         if (ads == null)
             return;
         final Iterator<Ad> zoneItr = zoneAds.iterator();
         Ad zoneAd;
         while (zoneItr.hasNext()) {
             zoneAd = zoneItr.next();
-            if (zoneAd.isInvalid()
-                    || !ResanaPreferences.getBoolean(appContext, zoneAd.getId() + "ddd", false)) {
+            if (zoneAd.isInvalid()) {
                 zoneItr.remove();
                 ads.get().remove(zoneAd);
                 ads.needsPersist();
@@ -190,8 +191,7 @@ class NativeAdProvider {
         Ad noZoneAd;
         while (noZoneItr.hasNext()) {
             noZoneAd = noZoneItr.next();
-            if (noZoneAd.isInvalid()
-                    || !ResanaPreferences.getBoolean(appContext, noZoneAd.getId() + "ddd", false)) {
+            if (noZoneAd.isInvalid()) {
                 noZoneItr.remove();
                 ads.get().remove(noZoneAd);
                 ads.needsPersist();
