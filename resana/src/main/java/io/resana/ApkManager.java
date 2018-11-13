@@ -99,13 +99,13 @@ class ApkManager {
     void downloadAndInstallApk(final NativeAd ad) {
         if (ad == null)
             return;
-        FileManager.FileSpec apkFileSpec = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName());
+        FileManager.FileSpec apkFileSpec = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_CACHE, ad.getApkFileName());
         File apkFile = apkFileSpec.getFile(appContext);
         ResanaLog.d(TAG, "DownloadAndInstallApk: apk file name: " + apkFile.getName());
         if (isApkDownloading(appContext, apkFile))
             return;
         Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
-        FileManager.getInstance(appContext).downloadFile(new FileManager.FileSpec(ad.getApkUrl(), FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName()), false, new FileManager.Delegate() {
+        FileManager.getInstance(appContext).downloadFile(new FileManager.FileSpec(ad.getApkUrl(), FileManager.FileSpec.DIR_TYPE_CACHE, ad.getApkFileName()), false, new FileManager.Delegate() {
             @Override
             void onFinish(boolean success, Object... args) {
                 if (!success) {
