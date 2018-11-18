@@ -1,5 +1,10 @@
 # Resana Change Log
 
+## 7.4.1 STABLE
+* bug fixed in blocked zones
+* SDK_VERSION_NUM = 18
+* DB_VERSION = 8
+
 ## 7.4.0 STABLE
 * added Resana.init
 * bug fixed logging
