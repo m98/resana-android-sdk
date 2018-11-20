@@ -350,7 +350,6 @@ class ResanaInternal {
                     if (ResanaConfig.gettingSplashAds(context) && ad.getType() == AdDto.AD_TYPE_SPLASH)
                         splashes.add(ad);
                     else if (ResanaConfig.gettingNativeAds(context) && ad.getType() == AdDto.AD_TYPE_NATIVE)
-                        if (!NativeAdProvider.isBlockedZone(ad))  //if received ad is in a blocked zone, we will not add it to list.
                             natives.add(ad);
                 }
 
