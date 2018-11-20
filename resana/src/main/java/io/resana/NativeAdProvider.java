@@ -114,7 +114,8 @@ class NativeAdProvider {
             for (Ad item : items) {
                 ResanaLog.d(TAG, "newAdsReceived: ctl: " + item.data.ctl);
                 if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
-                    downloadAdFiles(item);
+                    if (item.hasApk() && ApkManager.canDownloadApk(appContext))
+                        downloadAdFiles(item);
                 }
             }
         }
@@ -154,10 +155,10 @@ class NativeAdProvider {
         if (ads == null)
             return;
         final Iterator<Ad> itr = ads.get().iterator();
-        Ad zoneAd;
+        Ad ad;
         while (itr.hasNext()) {
-            zoneAd = itr.next();
-            if (zoneAd.isInvalid()) {
+            ad = itr.next();
+            if (ad.isInvalid()) {
                 itr.remove();
                 ads.needsPersist();
             }
