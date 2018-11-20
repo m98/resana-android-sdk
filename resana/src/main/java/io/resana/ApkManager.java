@@ -38,6 +38,10 @@ class ApkManager {
         this.appContext = context.getApplicationContext();
     }
 
+    static boolean canDownloadApk(Context context) {
+        return StorageManager.canWriteToStorage(context) && StorageManager.canReadFromStorage(context);
+    }
+
     boolean isApkInstalled(Ad ad) {
         if (!ad.hasPackageName())
             return false;
