@@ -90,8 +90,6 @@ final class Ad implements Parcelable, Serializable {
     }
 
     boolean isInvalid() {
-        ResanaLog.e(TAG, "isInvalid: outDated: " + isOutDated() + " isOld: " + AdVersionKeeper.isOldVersion(this) +
-                " renderEnough: " + AdVersionKeeper.isRenderedEnough(this));
         return isOutDated()
                 || AdVersionKeeper.isOldVersion(this)
                 || AdVersionKeeper.isRenderedEnough(this);
