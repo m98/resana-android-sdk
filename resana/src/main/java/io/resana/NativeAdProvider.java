@@ -28,13 +28,10 @@ class NativeAdProvider {
     private String adsFileName;
     private int adsQueueLength;
     private PersistableObject<Set<Ad>> ads;
-    private Set<Ad> noZoneAds;
-    private Set<Ad> zoneAds;
     private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private ExpiringSharedPreferences clickAckPrefs;
     private static String[] blockedZones;
-    private int NO_ZONE_ADS = 0, ZONE_ADS = 1;
     boolean isLoadingCacheAds = true;
 
     private boolean needsFlushCache;
@@ -44,8 +41,6 @@ class NativeAdProvider {
         this.appContext = context;
         this.adsFileName = NATIVE_ADS_FILE_NAME;
         this.adsQueueLength = 7;
-        this.zoneAds = new BoundedLinkedHashSet<>(adsQueueLength);
-        this.noZoneAds = new BoundedLinkedHashSet<>(adsQueueLength);
         loadCachedAds();
         loadBlockedZones();
         clickAckPrefs = new ExpiringSharedPreferences(appContext, CLICK_ACK_PREFS, 24 * 60 * 60 * 1000);
@@ -57,22 +52,6 @@ class NativeAdProvider {
         if (needsFlushCache)
             flushCache();
         ResanaLog.d(TAG, "cachedAdsLoaded: size " + this.ads.get().size());
-        separateAds();
-    }
-
-    /**
-     * This function will separate all ads and create no zone and zone ads list
-     */
-    private void separateAds() {
-        ResanaLog.d(TAG, "separateAds: separating ads");
-        final Iterator<Ad> itr = ads.get().iterator();
-        while (itr.hasNext()) {
-            Ad ad = itr.next();
-            if (ad.data.zones == null || ad.data.zones.length == 0) //this ad does not have zone
-                noZoneAds.add(ad);
-            else
-                zoneAds.add(ad);
-        }
     }
 
     static boolean isBlockedZone(String zone) {
@@ -142,13 +121,11 @@ class NativeAdProvider {
     }
 
     void flushCache() {
-        if (noZoneAds == null || zoneAds == null) {
+        if (ads == null) {
             needsFlushCache = true;
             return;
         }
         ads.get().clear();
-        noZoneAds.clear();
-        zoneAds.clear();
         ads.persist();
         needsFlushCache = false;
     }
@@ -165,7 +142,6 @@ class NativeAdProvider {
                         ads.needsPersist();
                         ads.persistIfNeeded();
                         ResanaLog.d(TAG, "downloadAdFiles: adding item to ads. ads size: " + ads.get().size());
-                        separateAds();
                     }
                     ad.data.ts = "" + System.currentTimeMillis();
                 }
@@ -177,44 +153,24 @@ class NativeAdProvider {
         ResanaLog.d(TAG, "pruneAds: ");
         if (ads == null)
             return;
-        final Iterator<Ad> zoneItr = zoneAds.iterator();
+        final Iterator<Ad> itr = ads.get().iterator();
         Ad zoneAd;
-        while (zoneItr.hasNext()) {
-            zoneAd = zoneItr.next();
+        while (itr.hasNext()) {
+            zoneAd = itr.next();
             if (zoneAd.isInvalid()) {
-                zoneItr.remove();
-                ads.get().remove(zoneAd);
-                ads.needsPersist();
-            }
-        }
-        final Iterator<Ad> noZoneItr = noZoneAds.iterator();
-        Ad noZoneAd;
-        while (noZoneItr.hasNext()) {
-            noZoneAd = noZoneItr.next();
-            if (noZoneAd.isInvalid()) {
-                noZoneItr.remove();
-                ads.get().remove(noZoneAd);
+                itr.remove();
                 ads.needsPersist();
             }
         }
         ads.persistIfNeeded();
     }
 
-    private void roundRobinOnAds(int type) {
-        if (type == NO_ZONE_ADS) {
-            final Iterator<Ad> noZoneAdItr = noZoneAds.iterator();
-            Ad remove = noZoneAdItr.next();
-            noZoneAdItr.remove();
-            noZoneAds.add(remove);
-        } else {
-            final Iterator<Ad> zoneAdItr = zoneAds.iterator();
-            Ad remove = zoneAdItr.next();
-            zoneAdItr.remove();
-            zoneAds.add(remove);
-        }
-        ads.get().clear();
-        ads.get().addAll(noZoneAds);
-        ads.get().addAll(zoneAds);
+    private void roundRobinOnAds() {
+        ResanaLog.d(TAG, "roundRobinOnAds: ");
+        final Iterator<Ad> itr = ads.get().iterator();
+        Ad remove = itr.next();
+        itr.remove();
+        ads.get().add(remove);
     }
 
     private int numberOfAdsInQueue(long adId) {
@@ -286,48 +242,19 @@ class NativeAdProvider {
         }
         final boolean cooldown = !CoolDownHelper.shouldShowNativeAd(appContext);
         Ad result = null;
-        if (!zone.equals("")) {
-            final Ad hotZoneAd = nextReadyToRenderZoneAd(true, zone, hasTitle);
-            if (hotZoneAd != null) {
-                result = hotZoneAd;
-                typeOfAd = ZONE_ADS;
-            } else { // there was no zone hot ad. so checking no zone hot ads.
-                Ad hotNoZonedAd = nextReadyToRenderNoZoneAd(true, hasTitle);
-                if (hotNoZonedAd != null) {
-                    result = hotNoZonedAd;
-                    typeOfAd = NO_ZONE_ADS;
-                } else { //there were not any no zone hot ad. so checking not hot zone ads.
-                    Ad noHotZoneAd = nextReadyToRenderZoneAd(false, zone, hasTitle);
-                    if (noHotZoneAd != null) {
-                        result = noHotZoneAd;
-                        typeOfAd = ZONE_ADS;
-                    } else { //there were not any zone not hot ad. so checking not hot no zone ads.
-                        Ad noHotNoZoneAd = nextReadyToRenderNoZoneAd(false, hasTitle);
-                        if (noHotNoZoneAd != null) {
-                            result = noHotNoZoneAd;
-                            typeOfAd = NO_ZONE_ADS;
-                        }
-                    }
-                }
-            }
-        }
-        if (zone.equals("")) {
-            Ad hotNoZoneAd = nextReadyToRenderNoZoneAd(true, hasTitle);
-            if (hotNoZoneAd != null) {
-                result = hotNoZoneAd;
-                typeOfAd = ZONE_ADS;
-            } else {
-                Ad notHotNoZoneAd = nextReadyToRenderNoZoneAd(false, hasTitle);
-                if (notHotNoZoneAd != null) {
-                    result = notHotNoZoneAd;
-                    typeOfAd = NO_ZONE_ADS;
-                }
+        final Ad hotAd = nextReadyToRenderAd(true, zone, hasTitle);
+        if (hotAd != null) {
+            result = hotAd;
+        } else {
+            final Ad notHotAd = nextReadyToRenderAd(false, zone, hasTitle);
+            if (notHotAd != null) {
+                result = notHotAd;
             }
         }
 
         if (result != null) {
             if (!result.data.hot) {
-                roundRobinOnAds(typeOfAd);
+                roundRobinOnAds();
                 ads.persist();
             }
             if (!cooldown)
@@ -337,48 +264,24 @@ class NativeAdProvider {
         return null;
     }
 
-
-    private Ad nextReadyToRenderNoZoneAd(boolean hotOnly, boolean hasTitle) {//todo
-        final Iterator<Ad> iterator = noZoneAds.iterator();
+    private Ad nextReadyToRenderAd(boolean hotOnly, String zone, boolean hasTitle) {
+        final Iterator<Ad> iterator = ads.get().iterator();
         if (!hotOnly) {
             while (iterator.hasNext()) {
                 Ad ad = iterator.next();
-                if (!hasTitle)
-                    return ad;
-                else if (hasTitle(ad))
+                if (!hasTitle) {
+                    if (validZone(ad, zone))
+                        return ad;
+                } else if (validZone(ad, zone) && hasTitle(ad))
                     return ad;
             }
         } else {
             while (iterator.hasNext()) {
                 Ad ad = iterator.next();
                 if (!hasTitle) {
-                    if (ad.data.hot)
+                    if (ad.data.hot && validZone(ad, zone))
                         return ad;
-                } else if (ad.data.hot && hasTitle(ad))
-                    return ad;
-            }
-        }
-        return null;
-    }
-
-    private Ad nextReadyToRenderZoneAd(boolean hotOnly, String zone, boolean hasTitle) {
-        final Iterator<Ad> iterator = zoneAds.iterator();
-        if (!hotOnly) {
-            while (iterator.hasNext()) {
-                Ad ad = iterator.next();
-                if (!hasTitle) {
-                    if (validZone(ad.data.zones, zone))
-                        return ad;
-                } else if (validZone(ad.data.zones, zone) && hasTitle(ad))
-                    return ad;
-            }
-        } else {
-            while (iterator.hasNext()) {
-                Ad ad = iterator.next();
-                if (!hasTitle) {
-                    if (ad.data.hot && validZone(ad.data.zones, zone))
-                        return ad;
-                } else if (ad.data.hot && validZone(ad.data.zones, zone) && hasTitle(ad))
+                } else if (ad.data.hot && validZone(ad, zone) && hasTitle(ad))
                     return ad;
             }
         }
@@ -394,13 +297,20 @@ class NativeAdProvider {
      */
     private boolean validZone(String[] zones, String zone) {
         if (zone.equals(""))
-            return true;
-        if (zones == null || zones.length == 0)
-            return true;
-        if (blockedZones != null)
-            return Arrays.asList(zones).contains(zone) && !Arrays.asList(blockedZones).contains(zone);
-        else
-            return Arrays.asList(zones).contains(zone);
+            if (zones == null || zones.length == 0)
+                return true;
+        if (!zone.equals("")) {
+            if (Arrays.asList(zones).contains(zone))
+                return true;
+            if (zones == null || zones.length == 0)
+                return true;
+        }
+        return false;
+    }
+
+    private boolean validZone(Ad ad, String zone) {
+        String[] zones = ad.data.zones;
+        return validZone(zones, zone);
     }
 
     /**
@@ -411,24 +321,6 @@ class NativeAdProvider {
      */
     private boolean hasTitle(Ad ad) {
         return ((NativeDto) ad.data).texts != null && ((NativeDto) ad.data).texts.titleText != null;
-    }
-
-    /**
-     * will check an ad is in a blocked zone or not
-     *
-     * @param ad
-     * @return
-     */
-    static boolean isBlockedZone(Ad ad) {
-        String[] adZones = ((NativeDto) ad.data).zones;
-        if (adZones == null || adZones.length == 0
-                || blockedZones == null || blockedZones.length == 0)
-            return false;
-        for (int i = 0; i < adZones.length; i++) {
-            if (Arrays.asList(blockedZones).contains(adZones[i]))
-                return true;
-        }
-        return false;
     }
 
     NativeAd getAd(boolean hasTitle, String zone) {
