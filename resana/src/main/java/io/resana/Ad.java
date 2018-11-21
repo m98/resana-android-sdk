@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +50,7 @@ final class Ad implements Parcelable, Serializable {
     long imageShowingTimeElapsed;
 
     Ad(String rawMsg) {
+        long time = System.currentTimeMillis();
         try {
             final Object o = (new JSONTokener(rawMsg)).nextValue();
             if (o instanceof JSONObject) {
@@ -57,6 +59,8 @@ final class Ad implements Parcelable, Serializable {
                 ctrls = ControlDto.parseArray(((JSONArray) o));
             else
                 throw new RuntimeException("invalid!");
+            if (ResanaInternal.instance != null)
+                ResanaInternal.instance.sendToServer("TMP:" + (System.currentTimeMillis() - time));
         } catch (Exception e) { //JSONException or any other unExpected Exception
             isCorrupted = true;
             ResanaLog.w(TAG, "Could not parse a message", e);
@@ -90,6 +94,8 @@ final class Ad implements Parcelable, Serializable {
     }
 
     boolean isInvalid() {
+        Log.e(TAG, "isInvalid: isOutDated: " + isOutDated() + " isOldVersion: " + AdVersionKeeper.isOldVersion(this)
+         + " isRenderedEnough: " + AdVersionKeeper.isRenderedEnough(this));
         return isOutDated()
                 || AdVersionKeeper.isOldVersion(this)
                 || AdVersionKeeper.isRenderedEnough(this);
