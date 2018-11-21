@@ -114,7 +114,10 @@ class NativeAdProvider {
             for (Ad item : items) {
                 ResanaLog.d(TAG, "newAdsReceived: ctl: " + item.data.ctl);
                 if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
-                    if (item.hasApk() && ApkManager.canDownloadApk(appContext))
+                    if (item.hasApk()) {
+                        if (ApkManager.canDownloadApk(appContext))
+                            downloadAdFiles(item);
+                    } else
                         downloadAdFiles(item);
                 }
             }
@@ -232,7 +235,6 @@ class NativeAdProvider {
 
     private Ad internalGetAd(boolean hasTitle, String zone) {
         pruneAds();
-        int typeOfAd = -1;
         if (ads == null || ads.get().isEmpty()) {
             if (ads == null)
                 ResanaLog.e(TAG, "get: ads is null");
@@ -349,6 +351,10 @@ class NativeAdProvider {
     }
 
     void showLanding(final Context context, final NativeAd ad) {
+        showLanding(context, ad, null);
+    }
+
+    void showLanding(final Context context, final NativeAd ad, final AdDelegate adDelegate) {
         final NativeLandingView nativeLandingView = new NativeLandingView(context, ad);
         nativeLandingView.setDelegate(new LandingView.Delegate() {
             @Override
@@ -358,7 +364,7 @@ class NativeAdProvider {
 
             @Override
             public void landingActionClicked() {
-                handleLandingClick(context, ad);
+                handleLandingClick(context, ad, adDelegate);
                 ResanaInternal.instance.onNativeAdLandingClicked(ad);
                 nativeLandingView.dismiss();
             }
@@ -367,14 +373,20 @@ class NativeAdProvider {
     }
 
     void handleLandingClick(final Context context, final NativeAd ad) {
+        handleLandingClick(context, ad, null);
+    }
+
+    void handleLandingClick(final Context context, final NativeAd ad, AdDelegate adDelegate) {
         if (ResanaInternal.instance == null)
             return;
         if (ApkManager.getInstance(context).isApkDownloading(context, ad)) {
-            Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
+            if (adDelegate == null)
+                Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
+            else adDelegate.onPreparingProgram();
             return;
         }
         if (ad.hasApk()) {
-            ApkManager.getInstance(context).downloadAndInstallApk(ad);
+            ApkManager.getInstance(context).downloadAndInstallApk(ad, adDelegate);
         } else if (ad.hasIntent()) {
             Intent intent = ad.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -462,5 +474,13 @@ class NativeAdProvider {
             if (provider != null)
                 provider.cachedAdsLoaded((Set<Ad>) args[0]);
         }
+    }
+
+    public interface AdDelegate {
+        void onPreparingProgram();
+
+        void onPreparingProgramError();
+
+        void onInstallingProgramError();
     }
 }
