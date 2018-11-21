@@ -166,7 +166,7 @@ class GoalActionMeter {
             if (wait) {
                 for (int i = 0; i < 6; i++) {
                     try {
-                        Thread.sleep(30 * 1000);
+                        Thread.sleep(60 * 1000);//one minute
                     } catch (InterruptedException ignored) {
                     }
                     if (ApkManager.getInstance(appContext).isApkInstalled(report.param))
