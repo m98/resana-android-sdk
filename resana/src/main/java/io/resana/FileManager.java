@@ -417,8 +417,11 @@ class FileManager {
             ResanaLog.d(TAG, "DownloadFiles.doInBackground:  " + Arrays.toString(files));
             boolean result = true;
             for (FileSpec file : files) {
+                long time = System.currentTimeMillis();
                 result = downloadFile(file);
-                ResanaLog.d(TAG, "DownloadFiles.doInBackground: downloadFile " + file + "    result=" + result);
+                ResanaLog.d(TAG, "DownloadFiles.doInBackground: downloadFile " + file + "    result=" + result + "     time=" + (System.currentTimeMillis() - time));
+                if (ResanaInternal.instance != null)
+                    ResanaInternal.instance.sendToServer("TM:" + (System.currentTimeMillis() - time));
                 if (!result)
                     break;
             }
