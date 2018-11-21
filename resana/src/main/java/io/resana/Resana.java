@@ -95,8 +95,12 @@ public class Resana {
     }
 
     public void onNativeAdClicked(Context context, NativeAd ad) {
+        onNativeAdClicked(context, ad, null);
+    }
+
+    public void onNativeAdClicked(Context context, NativeAd ad, AdDelegate adDelegate) {
         checkInstance();
-        instance.onNativeAdClicked(context, ad);
+        instance.onNativeAdClicked(context, ad, adDelegate);
     }
 
     public void onAdDismissed(String secretKey, DismissOption reason) {

@@ -70,7 +70,7 @@ class ApkManager {
         return pkgs;
     }
 
-    static void installApk(Context context, File apk, NativeAdProvider.AdDelegate adDelegate) {
+    static void installApk(Context context, File apk, AdDelegate adDelegate) {
         try {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -102,7 +102,7 @@ class ApkManager {
         return isApkDownloading(context, apkFile);
     }
 
-    void downloadAndInstallApk(final NativeAd ad, final NativeAdProvider.AdDelegate adDelegate) {
+    void downloadAndInstallApk(final NativeAd ad, final AdDelegate adDelegate) {
         if (ad == null)
             return;
         FileManager.FileSpec apkFileSpec = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName());

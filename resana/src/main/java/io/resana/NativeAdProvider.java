@@ -475,12 +475,4 @@ class NativeAdProvider {
                 provider.cachedAdsLoaded((Set<Ad>) args[0]);
         }
     }
-
-    public interface AdDelegate {
-        void onPreparingProgram();
-
-        void onPreparingProgramError();
-
-        void onInstallingProgramError();
-    }
 }

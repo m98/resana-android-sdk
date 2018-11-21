@@ -248,7 +248,7 @@ class ResanaInternal {
         onNativeAdClicked(context, ad, null);
     }
 
-    void onNativeAdClicked(Context context, NativeAd ad, NativeAdProvider.AdDelegate adDelegate) {
+    void onNativeAdClicked(Context context, NativeAd ad, AdDelegate adDelegate) {
         if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
