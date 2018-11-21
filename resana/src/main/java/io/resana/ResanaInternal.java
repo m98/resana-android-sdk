@@ -245,15 +245,19 @@ class ResanaInternal {
     }
 
     void onNativeAdClicked(Context context, NativeAd ad) {
+        onNativeAdClicked(context, ad, null);
+    }
+
+    void onNativeAdClicked(Context context, NativeAd ad, NativeAdProvider.AdDelegate adDelegate) {
         if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
         sendToServer(nativeProvider.getClickAck(ad.getSecretKey()));
         if (ad.hasLanding()) {
-            nativeProvider.showLanding(context, ad);
+            nativeProvider.showLanding(context, ad, adDelegate);
         } else {
-            nativeProvider.handleLandingClick(context, ad);
+            nativeProvider.handleLandingClick(context, ad, adDelegate);
         }
 
     }
