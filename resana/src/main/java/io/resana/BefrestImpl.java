@@ -21,8 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -36,13 +34,8 @@ import static io.resana.ResanaPreferences.PREF_CONNECT_ANOMALY_DATA_RECORDING_TI
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES;
 import static io.resana.ResanaPreferences.PREF_CONTINUOUS_CLOSES_TYPES;
 import static io.resana.ResanaPreferences.PREF_LAST_SUCCESSFUL_CONNECT_TIME;
-import static io.resana.ResanaPreferences.PREF_LOC_ACU;
-import static io.resana.ResanaPreferences.PREF_LOC_LAT;
-import static io.resana.ResanaPreferences.PREF_LOC_LONG;
-import static io.resana.ResanaPreferences.PREF_LOC_TIME;
 import static io.resana.ResanaPreferences.PREF_MEDIA_ID;
 import static io.resana.ResanaPreferences.getPrefs;
-import static io.resana.ResanaPreferences.saveFloat;
 import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveLong;
 import static io.resana.ResanaPreferences.saveString;
@@ -117,20 +110,17 @@ final class BefrestImpl implements Befrest, BefrestInternal {
     }
 
 
-    /**
-     * Start push service. You should set uId and chId before calling this start.
-     * Best Practice: call this method in your onCreate() method of your Application class
-     * Yous should also call this method anytime you set authToken.
-     *
-     * @throws IllegalStateException if be called without a prior call to init()
-     */
-    public void start() {
-        ResanaLog.i(TAG, "starting resana");
-        isBefrestStarted = true;
-        if (connectionDataChangedSinceLastStart)
-            context.stopService(new Intent(context, pushService));
-        context.startService(new Intent(context, pushService).putExtra(AdService.CONNECT, true));
-        connectionDataChangedSinceLastStart = false;
+    static void startService(Context context, Class pushService, String flag) {
+        try {
+            Intent i = new Intent(context, pushService);
+            if (flag != null) {
+                i.putExtra(flag, true);
+            }
+            context.startService(i);
+        } catch (Throwable t) {
+            //Start service cannot be called from background in Android 8+
+            ResanaLog.e("StartService", t);
+        }
     }
 
     /**
@@ -166,21 +156,19 @@ final class BefrestImpl implements Befrest, BefrestInternal {
     }
 
     /**
-     * Request the push service to refresh its connection. You will be notified through your receivers
-     * whenever the connection refreshed.
+     * Start push service. You should set uId and chId before calling this start.
+     * Best Practice: call this method in your onCreate() method of your Application class
+     * Yous should also call this method anytime you set authToken.
      *
-     * @return true if a request was accepted, false otherwise.
+     * @throws IllegalStateException if be called without a prior call to init()
      */
-    public boolean refresh() {
-        if (!Util.isConnectedToInternet(context) || !isBefrestStarted)
-            return false;
-        ResanaLog.i(TAG, "resana Is Refreshing ...");
-        if (refreshIsRequested && (System.currentTimeMillis() - lastAcceptedRefreshRequestTime) < 10 * 1000)
-            return true;
-        refreshIsRequested = true;
-        lastAcceptedRefreshRequestTime = System.currentTimeMillis();
-        context.startService(new Intent(context, pushService).putExtra(AdService.REFRESH, true));
-        return true;
+    public void start() {
+        ResanaLog.i(TAG, "starting resana");
+        isBefrestStarted = true;
+        if (connectionDataChangedSinceLastStart)
+            context.stopService(new Intent(context, pushService));
+        BefrestImpl.startService(context, pushService, AdService.CONNECT);
+        connectionDataChangedSinceLastStart = false;
     }
 
     /**
@@ -289,6 +277,24 @@ final class BefrestImpl implements Befrest, BefrestInternal {
         continuousClosesTypes = "";
         saveString(context, PREF_CONTINUOUS_CLOSES_TYPES, continuousClosesTypes);
         saveInt(context, PREF_CONTINUOUS_CLOSES, reportedContinuousCloses);
+    }
+
+    /**
+     * Request the push service to refresh its connection. You will be notified through your receivers
+     * whenever the connection refreshed.
+     *
+     * @return true if a request was accepted, false otherwise.
+     */
+    public boolean refresh() {
+        if (!Util.isConnectedToInternet(context) || !isBefrestStarted)
+            return false;
+        ResanaLog.i(TAG, "resana Is Refreshing ...");
+        if (refreshIsRequested && (System.currentTimeMillis() - lastAcceptedRefreshRequestTime) < 10 * 1000)
+            return true;
+        refreshIsRequested = true;
+        lastAcceptedRefreshRequestTime = System.currentTimeMillis();
+        BefrestImpl.startService(context, pushService, AdService.REFRESH);
+        return true;
     }
 
     class BefrestException extends RuntimeException {

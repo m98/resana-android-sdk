@@ -95,7 +95,7 @@ class BefrestConnection extends Handler {
         @Override
         public void run() {
             if (appContext != null && !AdService.isDestroied)
-                appContext.startService(new Intent(appContext, pushService).putExtra(AdService.PING, true));
+                BefrestImpl.startService(appContext, pushService, AdService.PING);
         }
     };
 
