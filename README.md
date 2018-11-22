@@ -25,9 +25,11 @@ allprojects {
      }
  }    
  
-    
+ ext {
+    resanaVersion = 'latest version'
+ }
 dependencies {
-    implementation( 'io.resana:resana:7.3.0@aar' ) {transitive = true}
+    implementation( 'io.resana:resana:$resanaVersion@aar' ) {transitive = true}
 }
 ```
 ## Documentation
