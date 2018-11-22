@@ -1,6 +1,15 @@
 # Resana Change Log
 
-## 7.4.1 STABLE
+## 7.4.4 STABLE
+* bug fixed in showing ads instantly
+* bug fixed in getting ads with zone
+* checking storage permission befor downloading apk files
+* bug fixed in installing apk files
+* adding ad delegate for ads which have apk to download
+* reporting time of downloading files to server
+* performance improved
+
+## 7.4.1 
 * bug fixed in blocked zones
 * SDK_VERSION_NUM = 18
 * DB_VERSION = 8
