@@ -73,8 +73,8 @@ class ApkManager {
     static void installApk(Context context, File apk, AdDelegate adDelegate) {
         try {
             Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Uri n = ResanaFileProvider.getUriForFile(context, context.getPackageName() + ".provider", apk);
             if (Build.VERSION.SDK_INT >= 24)
                 i.setDataAndType(n, "application/vnd.android.package-archive");
