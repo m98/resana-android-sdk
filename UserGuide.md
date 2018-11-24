@@ -39,10 +39,10 @@ add the following codes to your manifest file
 ```
 
 <br />
-Initialize Resana in a page you want to show ads with the following code. it is recommended to initialize Resana at the beginning of your application. usually in application class. <br />
+Initialize Resana at the beginning of you application by caling Resana.init method
 
 ```ruby
-Resana resana = Resana.create(applicationContext, Resana.LOG_LEVEL_VERBOSE, resanaConfig);
+Resana.init(Context, ResanaConfig)
 ```
 
 resanaCongig is configuration of resana and should be implemented like this:
@@ -59,13 +59,12 @@ first argument of this class is an array of ads you want to use and second is th
 * ResanaConfig.VisualType.**HORIZONTAL**: horizental visual of ad
 * ResanaConfig.VisualType.**OROGINAL**: original visual of ad
 
-third argument of this method is Resana log level.
+Resana.init will only save configuration and will not start resana.
+for starting resana use Resana.create
 
-* **LOG_LEVEL_VERBOSE**: Resana will log every thing.
-* **LOG_LEVEL_DEBUG**: Resana will only log debug information.
-* **LOG_LEVEL_ERROR**: Resana will only log errors.
-* **LOG_LEVEL_NO_LOG**: Resana will not log anything.
-
+```ruby
+Resana resana = Resana.create(applicationContext);
+```
 <br />
 for disabling Resana you can use:
 
@@ -162,5 +161,25 @@ when a native ad is clicked, you should use this method in OnClick method for sh
 
 ```ruby
 resana.onNativeAdClicked(Context context, NativeAd ad)
+resana.onNativeAdClicked(Context context, NativeAd ad, AdDelegate adDelegate)
 ```
+
+<br />
+if Ad has apk file to download and install methods of AdDelegate interface will be called.
+
+```ruby
+
+public interface AdDelegate {
+    void onPreparingProgram();
+ 
+    void onPreparingProgramError();
+ 
+    void onInstallingProgramError();
+}
+```
+<br />
+
+* onPreparingProgram() is called when file is downloading
+* onPreparingProgramError() is called when there is a problem in downloading file. This problem can be due to the slow or deadlock of the Internet or the lack of permission to write to the disk
+* onInstallingProgramErro() is called when there is a problem installing file. This problem can be due to lack of permission to write to the disk
 
