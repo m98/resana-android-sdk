@@ -303,9 +303,9 @@ class NativeAdProvider {
             if (zones == null || zones.length == 0)
                 return true;
         if (!zone.equals("")) {
-            if (Arrays.asList(zones).contains(zone))
-                return true;
             if (zones == null || zones.length == 0)
+                return true;
+            if (Arrays.asList(zones).contains(zone))
                 return true;
         }
         return false;
