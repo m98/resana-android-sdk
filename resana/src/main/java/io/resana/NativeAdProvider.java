@@ -411,6 +411,20 @@ class NativeAdProvider {
         dismissOptionsView.show();
     }
 
+    String getQueueDetails() {
+        String result = "";
+        if (ads == null) {
+            return "ads queue is not initialized yet!";
+        }
+        result += "size=" + ads.get().size() + "\n";
+        Iterator<Ad> iterator = ads.get().iterator();
+        while (iterator.hasNext()) {
+            Ad ad = iterator.next();
+            result += "id=" + ad.data.id + "   landing" + ad.hasLanding() + "\n";
+        }
+        return result;
+    }
+
     private static class Acks {
 
         String order;

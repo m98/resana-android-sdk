@@ -113,6 +113,11 @@ public class Resana {
         instance.onNativeAdLongClick(context, ad);
     }
 
+    public String getNativeDetails() {
+        checkInstance();
+        return instance.getNativeDetails();
+    }
+
     public boolean canDismissAds() {
         checkInstance();
         return instance.adsAreDismissible;

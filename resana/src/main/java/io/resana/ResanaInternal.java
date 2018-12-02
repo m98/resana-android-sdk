@@ -237,6 +237,12 @@ class ResanaInternal {
         AdVersionKeeper.adRendered(ad.getId() + "");
     }
 
+    String getNativeDetails() {
+        if (nativeProvider == null)
+            return "native ads is disabled!";
+        return nativeProvider.getQueueDetails();
+    }
+
     void onSplashRendered(Ad ad) {
         if (splashProvider == null)
             return;
