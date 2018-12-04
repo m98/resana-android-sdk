@@ -82,7 +82,7 @@ final class BefrestImpl implements Befrest, BefrestInternal {
 
     private int reportedContinuousCloses;
     private String continuousClosesTypes;
-    
+
     @Override
     public Befrest init(String media, String[] categories) {
         String newCats = getFormedCategoryString(categories);
@@ -137,10 +137,15 @@ final class BefrestImpl implements Befrest, BefrestInternal {
     public void sendMessage(String msg) {
         if (!Util.isConnectedToInternet(context) || !isBefrestStarted)
             return;
-        Intent i = new Intent(context, pushService);
-        i.putExtra(AdService.SEND_MESSAGE, true);
-        i.putExtra(AdService.KEY_MESSAGE_TO_BE_SENT, msg);
-        context.startService(i);
+        try {
+            Intent i = new Intent(context, pushService);
+            i.putExtra(AdService.SEND_MESSAGE, true);
+            i.putExtra(AdService.KEY_MESSAGE_TO_BE_SENT, msg);
+            context.startService(i);
+        } catch (Throwable t) {
+            //Start service cannot be called from background in Android 8+
+            ResanaLog.e("StartService", t);
+        }
     }
 
     @Override
@@ -149,10 +154,15 @@ final class BefrestImpl implements Befrest, BefrestInternal {
             //should not come here
             return;
         }
-        Intent i = new Intent(context, pushService);
-        i.putExtra(AdService.SEND_RESANA_ACK, true);
-        i.putExtra(AdService.KEY_MESSAGE_TO_BE_SENT, ack);
-        context.startService(i);
+        try {
+            Intent i = new Intent(context, pushService);
+            i.putExtra(AdService.SEND_RESANA_ACK, true);
+            i.putExtra(AdService.KEY_MESSAGE_TO_BE_SENT, ack);
+            context.startService(i);
+        } catch (Throwable t) {
+            //Start service cannot be called from background in Android 8+
+            ResanaLog.e("StartService", t);
+        }
     }
 
     /**
