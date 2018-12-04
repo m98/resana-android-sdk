@@ -398,7 +398,7 @@ class NativeAdProvider {
             Intent intent = ad.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             if (intent.resolveActivity(context.getPackageManager()) != null)
-                context.startActivity(intent);
+                context.startActivity(Intent.createChooser(intent, "انتخاب کنید"));
             else
                 ResanaLog.e(TAG, "handleLandingClick: unable to resolve intent");
         } else if (ad.hasLink()) {
@@ -406,7 +406,7 @@ class NativeAdProvider {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.setData(Uri.parse(ad.getLink()));
             if (i.resolveActivity(context.getPackageManager()) != null)
-                context.startActivity(i);
+                context.startActivity(Intent.createChooser(i, "انتخاب کنید"));
             else
                 ResanaLog.e(TAG, "handleLandingClick: unable to resolve link intent");
         }
