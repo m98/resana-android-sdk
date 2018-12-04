@@ -299,6 +299,13 @@ class NativeAdProvider {
      * @return
      */
     private boolean validZone(String[] zones, String zone) {
+        ResanaLog.d(TAG, "validZone: zone: " + zone);
+        if (zones == null)
+            ResanaLog.d(TAG, "validZone: ad has no zone.");
+        else
+            for (int i = 0; i < zones.length; i++) {
+            ResanaLog.d(TAG, "validZone: ad zone: " + zones[i]);
+        }
         if (zone.equals(""))
             if (zones == null || zones.length == 0)
                 return true;
