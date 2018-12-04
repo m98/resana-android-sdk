@@ -304,8 +304,8 @@ class NativeAdProvider {
             ResanaLog.d(TAG, "validZone: ad has no zone.");
         else
             for (int i = 0; i < zones.length; i++) {
-            ResanaLog.d(TAG, "validZone: ad zone: " + zones[i]);
-        }
+                ResanaLog.d(TAG, "validZone: ad zone: " + zones[i]);
+            }
         if (zone.equals(""))
             if (zones == null || zones.length == 0)
                 return true;
@@ -397,12 +397,18 @@ class NativeAdProvider {
         } else if (ad.hasIntent()) {
             Intent intent = ad.getIntent();
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            if (intent.resolveActivity(context.getPackageManager()) != null)
+                context.startActivity(intent);
+            else
+                ResanaLog.e(TAG, "handleLandingClick: unable to resolve intent");
         } else if (ad.hasLink()) {
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.setData(Uri.parse(ad.getLink()));
-            context.startActivity(i);
+            if (i.resolveActivity(context.getPackageManager()) != null)
+                context.startActivity(i);
+            else
+                ResanaLog.e(TAG, "handleLandingClick: unable to resolve link intent");
         }
     }
 
