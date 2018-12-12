@@ -9,7 +9,6 @@
     <permission android:name="${applicationId}.permission.RESANA_ADS" android:protectionLevel="signature" />
 
     <application>
-        <service android:name="io.resana.AdService" />
 
         <provider
             android:name="io.resana.ResanaFileProvider"
