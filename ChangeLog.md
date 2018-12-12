@@ -1,6 +1,6 @@
 # Resana Change Log
 
-## 7.4.4 STABLE
+## 7.4.6 STABLE
 * bug fixed in showing ads instantly
 * bug fixed in getting ads with zone
 * checking storage permission befor downloading apk files
