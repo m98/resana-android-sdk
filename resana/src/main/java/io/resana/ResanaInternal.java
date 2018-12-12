@@ -2,7 +2,6 @@ package io.resana;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -118,7 +117,6 @@ class ResanaInternal {
             ResanaLog.e(TAG, "You didn't mention native ads in resana config");
             return null;
         }
-        Log.e(TAG, "getNativeAd: " + zone);
         return nativeProvider.getAd(hasTitle, zone);
     }
 
