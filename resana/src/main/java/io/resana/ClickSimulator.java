@@ -98,8 +98,9 @@ class ClickSimulator {
                     scs.add(sc);
         if (scs.isEmpty()) {
             ResanaInternal resana = ResanaInternal.instance;
-            if (resana != null)
-                resana.onReceiveSimulateClicksDone(ad);
+            //todo check this later
+//            if (resana != null)
+//                resana.onReceiveSimulateClicksDone(ad);
         } else {
             for (SimulateClickDto sc : scs)
                 receiveSimulateClicks.put(sc, ad);
@@ -120,8 +121,9 @@ class ClickSimulator {
                 pendingAds.remove(ad);
                 if (params[1] == 0) { // all request were successful
                     ResanaInternal resana = ResanaInternal.instance;
-                    if (resana != null)
-                        resana.onReceiveSimulateClicksDone(ad);
+                    //todo check this later
+//                    if (resana != null)
+//                        resana.onReceiveSimulateClicksDone(ad);
                 }
             }
         } else {
