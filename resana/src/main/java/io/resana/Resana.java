@@ -50,27 +50,6 @@ public class Resana {
         initCalled = true;
     }
 
-    public static Resana create(Context context, String[] tags, int logLevel) {
-        if (!initCalled)
-            throw new IllegalArgumentException("Call Resana.init first");
-        ResanaLog.setLogLevel(logLevel);
-        final Resana resana = new Resana(ResanaInternal.getInstance(context, tags));
-        references.add(resana);
-        return resana;
-    }
-
-    public static Resana create(Context context, String[] tags) {
-        return create(context, tags, LOG_LEVEL_VERBOSE);
-    }
-
-    public static Resana create(Context context) {
-        return create(context, null, LOG_LEVEL_VERBOSE);
-    }
-
-    public static Resana create(Context context, int logLevel) {
-        return create(context, null, logLevel);
-    }
-
     public void release() {
         if (references.remove(this)) {
             if (references.size() == 0)
