@@ -2,11 +2,14 @@ package io.resana;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieManager;
@@ -22,7 +25,9 @@ import java.util.Locale;
 import java.util.Map;
 
 class NetworkHelper {
+    static final String NATIVE_URL = "";
     private static volatile String deviceUserAgent;
+    private static final String TAG = ResanaLog.TAG_PREF + "NetworkHelper";
 
     static HttpURLConnection openConnection(String url) throws IOException {
         return openConnection("GET", url, null, null);
@@ -143,6 +148,41 @@ class NetworkHelper {
                 }
             }
         });
+    }
+
+//todo check it
+    private static class GetJsonResponse extends AsyncTask<String, Void, Boolean> {
+
+        GetJsonResponse(Context context, FileManager.Delegate delegate) {
+            ResanaLog.d(TAG, "GetJsonResponse");
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            String url = strings[0];
+            Map<String, String> headers = new HashMap<>();
+            ResanaLog.d(TAG, "GetJsonResponse.doInBackground:  url=" + url);
+            try {
+                HttpURLConnection connection = openConnection("GET", url, headers, null);
+                connection.connect();
+                int status = connection.getResponseCode();
+                switch (status) {
+                    case 200:
+                    case 201:
+                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line+"\n");
+                        }
+                        br.close();
+                        return sb.toString();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
     static class UrlNotSupportedException extends IllegalStateException {
