@@ -86,7 +86,7 @@ final class ResanaLog {
     }
 
     public static void e(final String tag, final String message, final Throwable exception) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_ERROR))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_ERROR))
             Log.e(tag, message, exception);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -108,7 +108,7 @@ final class ResanaLog {
     }
 
     public static void e(final String tag, final String message) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_ERROR))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_ERROR))
             Log.e(tag, message);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -129,7 +129,7 @@ final class ResanaLog {
     }
 
     public static void e(final String tag, final Throwable e) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_ERROR))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_ERROR))
             e.printStackTrace();
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -156,7 +156,7 @@ final class ResanaLog {
     }
 
     public static void d(final String tag, final String message) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_DEBUG))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_DEBUG))
             Log.d(tag, message);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -177,7 +177,7 @@ final class ResanaLog {
     }
 
     public static void i(final String tag, final String message) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_INFO))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_INFO))
             Log.i(tag, message);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -198,7 +198,7 @@ final class ResanaLog {
     }
 
     public static void v(final String tag, final String message) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_VERBOSE))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_VERBOSE))
             Log.v(tag, message);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
@@ -219,7 +219,7 @@ final class ResanaLog {
     }
 
     public static void w(final String tag, final String message) {
-        if (!(getLogLevel() > BefrestImpl.LOG_LEVEL_WARN))
+        if (!(getLogLevel() > Resana.LOG_LEVEL_WARN))
             Log.w(tag, message);
         if (!LogToFile) return;
         final int Tid = Process.myTid();
