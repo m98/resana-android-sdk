@@ -39,7 +39,6 @@ class ResanaInternal {
 
     static ResanaInternal instance;
 
-    private final String[] tags;
     private final Context appContext;
     private final String media;
 
@@ -51,9 +50,8 @@ class ResanaInternal {
     private long lastDismissTime;
     private int dismissRestDuration;
 
-    private ResanaInternal(Context context, String[] tags) {
+    private ResanaInternal(Context context) {
         this.appContext = context.getApplicationContext();
-        this.tags = tags;
         loadDismissOptions();
         GoalActionMeter.getInstance(context);
         AdVersionKeeper.init(context);
@@ -77,13 +75,13 @@ class ResanaInternal {
         DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
     }
 
-    static ResanaInternal getInstance(Context context, String[] tags) {
+    static ResanaInternal getInstance(Context context) {
         ResanaInternal localInstance = instance;
         if (localInstance == null) {
             synchronized (ResanaInternal.class) {
                 localInstance = instance;
                 if (localInstance == null) {
-                    localInstance = instance = new ResanaInternal(context, tags);
+                    localInstance = instance = new ResanaInternal(context);
                 }
             }
         }
