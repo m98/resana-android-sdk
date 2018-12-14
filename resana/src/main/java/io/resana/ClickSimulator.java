@@ -33,7 +33,7 @@ class ClickSimulator {
         appContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (BefrestImpl.Util.isConnectedToInternet(context)) {
+                if (Util.isConnectedToInternet(context)) {
                     final List<SimulateClickDto> scs = waitingForNetwork;
                     waitingForNetwork = new ArrayList<>();
                     for (SimulateClickDto sc : scs)
@@ -135,7 +135,7 @@ class ClickSimulator {
             return;
         if (currentlyRunningSimulations.contains(sc))
             return;
-        if (checkNetwork && !BefrestImpl.Util.isConnectedToInternet(appContext)) {
+        if (checkNetwork && !Util.isConnectedToInternet(appContext)) {
             waitingForNetwork.add(sc);
         } else {
             currentlyRunningSimulations.add(sc);
@@ -159,7 +159,7 @@ class ClickSimulator {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            networkUnavailable = !BefrestImpl.Util.isConnectedToInternet(appContext);
+            networkUnavailable = !Util.isConnectedToInternet(appContext);
         }
 
         @Override
