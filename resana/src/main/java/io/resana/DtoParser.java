@@ -120,7 +120,7 @@ class DtoParser {
 
         private void checkBase64Annotaion(Object object, Field field, Object value) throws IllegalAccessException {
             if (value != null)
-                field.set(object, BefrestImpl.Util.decodeBase64(value.toString()));
+                field.set(object, Util.decodeBase64(value.toString()));
         }
 
         private void checkNumericValuesAnnotation(Field field, Object value, NumericValues annotation) {

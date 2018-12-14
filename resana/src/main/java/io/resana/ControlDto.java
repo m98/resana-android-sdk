@@ -273,7 +273,7 @@ class ControlDto implements Parcelable, Serializable {
         static ResanaLabelParams fromJson(JSONObject jo) throws JSONException {
             final ResanaLabelParams res = new ResanaLabelParams();
             res.label = jo.getString("l");
-            res.text = BefrestImpl.Util.decodeBase64(jo.getString("t"));
+            res.text = Util.decodeBase64(jo.getString("t"));
             return res;
         }
 
@@ -338,7 +338,7 @@ class ControlDto implements Parcelable, Serializable {
                 String key;
                 while (itr.hasNext()) {
                     key = itr.next();
-                    res.options.put(key, BefrestInternal.Util.decodeBase64(options.getString(key)));
+                    res.options.put(key, Util.decodeBase64(options.getString(key)));
                 }
                 if (res.options.size() == 0)
                     res.options = null;
