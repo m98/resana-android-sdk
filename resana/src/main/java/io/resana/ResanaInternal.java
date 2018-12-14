@@ -1,7 +1,6 @@
 package io.resana;
 
 import android.content.Context;
-import android.os.Handler;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -43,7 +42,6 @@ class ResanaInternal {
     private final String[] tags;
     private final Context appContext;
     private final String media;
-    private AdReceiver adReceiver;
 
     private NativeAdProvider nativeProvider;
     private SplashAdProvider splashProvider;
@@ -75,10 +73,6 @@ class ResanaInternal {
 
     private void start() {
         ResanaLog.v(TAG, "Start");
-        adReceiver = new AdReceiver();
-        Befrest befrest = BefrestFactory.getInstance(appContext);
-        befrest.registerPushReceiver(adReceiver);
-        befrest.init(media, tags).start();
         saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
         DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
     }
@@ -97,13 +91,6 @@ class ResanaInternal {
     }
 
     void internalRelease() {
-        Befrest befrest = BefrestFactory.getInstance(appContext);
-        try {
-            befrest.unregisterPushReceiver(adReceiver);
-        } catch (Exception e) {
-            ResanaLog.w(TAG, "problem in unRegistering adReceiver. maybe you are calling resana.release() more that once?");
-        }
-        befrest.stop();
         saveSessionDuration();
         instance = null;
     }
@@ -304,62 +291,6 @@ class ResanaInternal {
     }
 
     void sendToServer(String msg) {
-        if (msg != null) {
-            ResanaLog.v(TAG, "sendToServer: " + msg);
-            BefrestFactory.getInstance(appContext).sendToServer(msg);
-        }
-    }
-
-    void onReceiveSimulateClicksDone(final Ad ad) {
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                if (instance != null) {
-                    adReceiver.handleAds(appContext, new Ad[]{ad}, false);
-                }
-            }
-        });
-    }
-
-    private class AdReceiver extends BefrestPushReceiver {
-        @Override
-        public void onPushReceived(Context context, Ad[] ads) {
-            handleAds(context, ads, true);
-        }
-
-        void handleAds(Context context, Ad[] ads, boolean runOnReceiveSimulateClicks) {
-            List<Ad> nonCtrls = new ArrayList<>();
-            for (Ad ad : ads) {
-                if (ad.isControlMsg()) {
-                    handleControlMessage(ad);
-                } else {
-                    ad.data.ts = "" + System.currentTimeMillis();
-                    if (!ad.isInvalid()) {
-                        AdVersionKeeper.updateAdVersion(ad);
-                        nonCtrls.add(ad);
-                    }
-                }
-            }
-            if (nonCtrls.isEmpty())
-                return;
-            if (runOnReceiveSimulateClicks) {
-                for (Ad ad : nonCtrls)
-                    ClickSimulator.getInstance(context).runOnReceiveSimulateClicksAndNotifySuccess(ad);
-            } else {
-                final List<Ad> splashes = new ArrayList<>();
-                final List<Ad> natives = new ArrayList<>();
-                for (Ad ad : nonCtrls) {
-                    if (ResanaConfig.gettingSplashAds(context) && ad.getType() == AdDto.AD_TYPE_SPLASH)
-                        splashes.add(ad);
-                    else if (ResanaConfig.gettingNativeAds(context) && ad.getType() == AdDto.AD_TYPE_NATIVE)
-                            natives.add(ad);
-                }
-
-                if (splashes.size() > 0 && ResanaConfig.gettingSplashAds(context))
-                    splashProvider.newAdsReceived(splashes);
-                if (natives.size() > 0 && ResanaConfig.gettingNativeAds(context))
-                    nativeProvider.newAdsReceived(natives);
-            }
-        }
+        //todo should be completed
     }
 }
