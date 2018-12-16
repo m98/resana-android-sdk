@@ -59,10 +59,7 @@ class ResanaInternal {
         media = AdViewUtil.getMediaId(appContext);
         if (media == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
-        if (ResanaConfig.gettingNativeAds(context))
-            nativeProvider = new NativeAdProvider(context);
-        if (ResanaConfig.gettingSplashAds(context))
-            splashProvider = new SplashAdProvider(context);
+        //todo handle config here
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
         NetworkHelper.checkUserAgent(appContext);
@@ -212,7 +209,7 @@ class ResanaInternal {
         if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_ACK);
-        sendToServer(nativeProvider.getRenderAck(ad.getSecretKey()));
+//        sendToServer(nativeProvider.getRenderAck(ad.getSecretKey()));
         AdVersionKeeper.adRendered(ad.getId() + "");
     }
 
@@ -232,7 +229,7 @@ class ResanaInternal {
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
-        sendToServer(nativeProvider.getClickAck(ad.getSecretKey()));
+//        sendToServer(nativeProvider.getClickAck(ad.getSecretKey()));
         if (ad.hasLanding()) {
             nativeProvider.showLanding(context, ad, adDelegate);
         } else {
@@ -253,7 +250,7 @@ class ResanaInternal {
         if (nativeProvider == null || ad == null)
             return;
         ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_LANDING_CLICK);
-        sendToServer(nativeProvider.getLandingAck(ad.getSecretKey()));
+//        sendToServer(nativeProvider.getLandingAck(ad.getSecretKey()));
     }
 
     void onNativeAdLongClick(Context context, NativeAd ad) {

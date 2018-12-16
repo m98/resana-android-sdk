@@ -30,7 +30,6 @@ class NativeAdProvider {
     private Map<String, List<Ad>> adsList;
     private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
-    private ExpiringSharedPreferences clickAckPrefs;
     private static String[] blockedZones;
 
     private boolean needsFlushCache;
@@ -52,7 +51,6 @@ class NativeAdProvider {
         this.adsQueueLength = 4;
         adsList = new HashMap<>();
         loadBlockedZones();
-        clickAckPrefs = new ExpiringSharedPreferences(appContext, CLICK_ACK_PREFS, 24 * 60 * 60 * 1000);
     }
 
     static boolean isBlockedZone(String zone) {
@@ -173,34 +171,6 @@ class NativeAdProvider {
                 res++;
         }
         return res;
-    }
-
-    String getRenderAck(String secretKey) {
-        final Acks acks = waitingToBeRenderedByClient.get(secretKey);
-        if (acks != null) {
-            waitingToBeRenderedByClient.remove(secretKey);
-            acks.saveToPrefs(clickAckPrefs, secretKey);
-            return acks.render;
-        }
-        return null;
-    }
-
-    String getClickAck(String secretKey) {
-        final Acks acks = new Acks().fromPrefs(clickAckPrefs, secretKey);
-        if (acks.click != null) {
-            acks.removeFromPref(clickAckPrefs, secretKey);
-            waitingForLandingClick.put(secretKey, acks);
-        }
-        return acks.click;
-    }
-
-    String getLandingAck(String secretKey) {
-        final Acks acks = waitingForLandingClick.get(secretKey);
-        waitingForLandingClick.remove(secretKey);
-        if (acks != null) {
-            return acks.landing;
-        }
-        return null;
     }
 
     private void loadBlockedZones() {
