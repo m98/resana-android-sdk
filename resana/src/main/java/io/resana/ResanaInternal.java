@@ -134,10 +134,6 @@ class ResanaInternal {
     private void handleControlMessage(Ad msg) {
         for (ControlDto ctrl : msg.ctrls) {
             if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {//TODO handle null pointer exeption here
-                if (splashProvider != null)
-                    splashProvider.flushCache();
-                if (nativeProvider != null)
-                    nativeProvider.flushCache();
             } else if (ControlDto.CMD_COOL_DOWN.equals(ctrl.cmd)) {
                 CoolDownHelper.handleCoolDownCtrl(appContext, ctrl);
             } else if (ControlDto.CMD_RESANA_LABEL.equals(ctrl.cmd)) {

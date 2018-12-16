@@ -27,7 +27,7 @@ class NativeAdProvider {
     private String adsFileName;
     private int adsQueueLength;
     private PersistableObject<Set<Ad>> ads;
-    private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();
+    private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private ExpiringSharedPreferences clickAckPrefs;
     private static String[] blockedZones;
@@ -107,16 +107,6 @@ class NativeAdProvider {
                 }
             }
         }
-    }
-
-    void flushCache() {
-        if (ads == null) {
-            needsFlushCache = true;
-            return;
-        }
-        ads.get().clear();
-        ads.persist();
-        needsFlushCache = false;
     }
 
     private void downloadAdFiles(final Ad ad) {
