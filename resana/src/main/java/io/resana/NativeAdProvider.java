@@ -120,16 +120,24 @@ class NativeAdProvider {
             void onFinish(boolean success, Object... args) {
                 ResanaLog.d(TAG, "onFinish: downloading native ad files finishes. success " + success);
                 if (success) {
-                    if (numberOfAdsInQueue(ad.data.id) < ad.data.ctl) {
-                        ads.get().add(ad);
-                        ads.needsPersist();
-                        ads.persistIfNeeded();
-                        ResanaLog.d(TAG, "downloadAdFiles: adding item to ads. ads size: " + ads.get().size());
-                    }
-                    ad.data.ts = "" + System.currentTimeMillis();
+                    adDownloaded(ad);
                 }
             }
         });
+    }
+
+    void downloadFistAd() {
+        for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
+            downloadAdFiles(entry.getValue().get(0));
+        }
+    }
+
+    void adDownloaded(Ad ad) {
+        ResanaPreferences.saveBoolean(appContext, ad.getId() + "downloaded", true);
+    }
+
+    boolean isDownloaded(Ad ad) {
+        return ResanaPreferences.getBoolean(appContext, ad.getId() + "downloaded", false);
     }
 
     private void pruneAds() {
