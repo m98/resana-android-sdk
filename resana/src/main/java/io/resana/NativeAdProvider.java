@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,10 +22,12 @@ class NativeAdProvider {
     private static final String TAG = ResanaLog.TAG_PREF + "NativeAdProvider";
     private static final String CLICK_ACK_PREFS = "RESANA_CLICK_ACK_PREFS" + 2;
 
+    private static NativeAdProvider instance;
     private Context appContext;
     private String adsFileName;
     private int adsQueueLength;
     private PersistableObject<Set<Ad>> ads;
+    private Map<String, List<Ad>> adsList;
     private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private ExpiringSharedPreferences clickAckPrefs;
@@ -32,11 +35,22 @@ class NativeAdProvider {
 
     private boolean needsFlushCache;
 
+    static NativeAdProvider getInstance(Context context) {
+        NativeAdProvider localInstance = instance;
+        synchronized (NativeAdProvider.class) {
+            localInstance = instance;
+            if (localInstance == null) {
+                localInstance = instance = new NativeAdProvider(context);
+            }
+        }
+        return localInstance;
+    }
 
-    NativeAdProvider(Context context) {
+    private NativeAdProvider(Context context) {
         this.appContext = context;
         this.adsFileName = NATIVE_ADS_FILE_NAME;
-        this.adsQueueLength = 7;
+        this.adsQueueLength = 4;
+        adsList = new HashMap<>();
         loadBlockedZones();
         clickAckPrefs = new ExpiringSharedPreferences(appContext, CLICK_ACK_PREFS, 24 * 60 * 60 * 1000);
     }
@@ -76,16 +90,27 @@ class NativeAdProvider {
 
     void newAdsReceived(List<Ad> items) {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
-            for (Ad item : items) {
-                ResanaLog.d(TAG, "newAdsReceived: ctl: " + item.data.ctl);
-                if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
-                    if (item.hasApk()) {
-                        if (ApkManager.canDownloadApk(appContext))
-                            downloadAdFiles(item);
-                    } else
-                        downloadAdFiles(item);
-                }
+        for (Ad item : items) {
+            String[] zones = item.data.zones;
+            for (String zone : zones) {
+                List<Ad> list = adsList.get(zone);
+                if (list == null)
+                    list = new ArrayList<>();
+                if (list.size() >= adsQueueLength)
+                    break;
+                if (item.data.hot)
+                    list.add(0, item);
+                else list.add(item);
+                adsList.put(zone, list);
             }
+        }
+//            if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
+//                if (item.hasApk()) {
+//                    if (ApkManager.canDownloadApk(appContext))
+//                        downloadAdFiles(item);
+//                } else
+//                    downloadAdFiles(item);
+//            }
     }
 
     private void downloadAdFiles(final Ad ad) {
