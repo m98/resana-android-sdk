@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,17 +40,8 @@ class NativeAdProvider {
         this.appContext = context;
         this.adsFileName = NATIVE_ADS_FILE_NAME;
         this.adsQueueLength = 7;
-        loadCachedAds();
         loadBlockedZones();
         clickAckPrefs = new ExpiringSharedPreferences(appContext, CLICK_ACK_PREFS, 24 * 60 * 60 * 1000);
-    }
-
-    private void cachedAdsLoaded(Set<Ad> ads) {
-        isLoadingCacheAds = false;
-        this.ads = createAdsPersistableObject(ads);
-        if (needsFlushCache)
-            flushCache();
-        ResanaLog.d(TAG, "cachedAdsLoaded: size " + this.ads.get().size());
     }
 
     static boolean isBlockedZone(String zone) {
@@ -85,11 +75,6 @@ class NativeAdProvider {
             }
             persistBlockedZones();
         }
-    }
-
-    private void loadCachedAds() {
-        isLoadingCacheAds = true;
-        FileManager.getInstance(appContext).loadObjectFromFile(new FileManager.FileSpec(adsFileName), new NativeAdProvider.LoadCachedAdsDelegate(this));
     }
 
     private PersistableObject<Set<Ad>> createAdsPersistableObject(Set<Ad> loaded) {
@@ -471,21 +456,6 @@ class NativeAdProvider {
                     .remove(key + "_click")
                     .remove(key + "_land")
                     .apply();
-        }
-    }
-
-    private static class LoadCachedAdsDelegate extends Delegate {
-        WeakReference<NativeAdProvider> providerRef;
-
-        LoadCachedAdsDelegate(NativeAdProvider provider) {
-            this.providerRef = new WeakReference<>(provider);
-        }
-
-        @Override
-        void onFinish(boolean success, Object... args) {
-            final NativeAdProvider provider = providerRef.get();
-            if (provider != null)
-                provider.cachedAdsLoaded((Set<Ad>) args[0]);
         }
     }
 }
