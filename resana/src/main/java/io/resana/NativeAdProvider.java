@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.widget.Toast;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.resana.FileManager.Delegate;
-import static io.resana.FileManager.FileSpec;
 import static io.resana.FileManager.NATIVE_ADS_FILE_NAME;
 import static io.resana.FileManager.PersistableObject;
 
@@ -31,7 +29,6 @@ class NativeAdProvider {
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private ExpiringSharedPreferences clickAckPrefs;
     private static String[] blockedZones;
-    boolean isLoadingCacheAds = true;
 
     private boolean needsFlushCache;
 
@@ -77,25 +74,8 @@ class NativeAdProvider {
         }
     }
 
-    private PersistableObject<Set<Ad>> createAdsPersistableObject(Set<Ad> loaded) {
-        final Set<Ad> ads = Collections.synchronizedSet(new BoundedLinkedHashSet<Ad>(adsQueueLength));
-        if (loaded != null)
-            ads.addAll(loaded);
-
-        return new PersistableObject<Set<Ad>>(ads) {
-            @Override
-            void onPersist() {
-                final FileSpec file = new FileSpec(adsFileName);
-                Set<Ad> adsCopy = new BoundedLinkedHashSet<>(adsQueueLength);
-                adsCopy.addAll(get());
-                FileManager.getInstance(appContext).persistObjectToFile(adsCopy, file, new FilePersistedDelegate(this));
-            }
-        };
-    }
-
     void newAdsReceived(List<Ad> items) {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
-        if (!isLoadingCacheAds) {
             for (Ad item : items) {
                 ResanaLog.d(TAG, "newAdsReceived: ctl: " + item.data.ctl);
                 if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
@@ -106,7 +86,6 @@ class NativeAdProvider {
                         downloadAdFiles(item);
                 }
             }
-        }
     }
 
     private void downloadAdFiles(final Ad ad) {
@@ -313,8 +292,6 @@ class NativeAdProvider {
             ResanaLog.d(TAG, "get: Native dismissRestTime");
             return null;
         }
-        if (isLoadingCacheAds)
-            return null;
 
         if (isBlockedZone(zone)) {
             ResanaLog.e(TAG, "get: zone " + zone + " is blocked");
