@@ -439,7 +439,7 @@ class FileManager {
                 if (!replaceIfExists && file.exists())
                     return true;
 
-                connection = NetworkHelper.openConnection(f.url);
+                connection = NetworkManager.openConnection(f.url);
                 String content_length = connection.getHeaderField("content-length");
                 if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                     return false; // expect HTTP 200 OK, so we don't mistakenly save error report instead of the file

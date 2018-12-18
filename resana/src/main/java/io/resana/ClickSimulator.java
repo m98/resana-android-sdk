@@ -170,9 +170,9 @@ class ClickSimulator {
                 return false;
             HttpURLConnection connection = null;
             try {
-                connection = NetworkHelper.openConnection(simulateClick.method, simulateClick.url, simulateClick.headers, simulateClick.params);
+                connection = NetworkManager.openConnection(simulateClick.method, simulateClick.url, simulateClick.headers, simulateClick.params);
                 return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
-            } catch (NetworkHelper.UrlNotSupportedException e) {
+            } catch (NetworkManager.UrlNotSupportedException e) {
                 //we got a non http url by following redirects on original url
                 //it is mainly because of market and bazzar url schemes so we assume it a successful click
                 return true;
