@@ -51,6 +51,7 @@ class NativeAdProvider {
         this.adsQueueLength = 4;
         adsList = new HashMap<>();
         loadBlockedZones();
+        NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext));
     }
 
     static boolean isBlockedZone(String zone) {
@@ -87,8 +88,8 @@ class NativeAdProvider {
     }
 
     void newAdsReceived(List<Ad> items) {
-        ResanaLog.d(TAG, "newAdsReceived: new ads received");
         pruneAds(items);
+        ResanaLog.e(TAG, "newAdsReceived: ads size=" + items.size());
         for (Ad item : items) {
             String[] zones = item.data.zones;
             for (String zone : zones) {
@@ -103,19 +104,16 @@ class NativeAdProvider {
                 adsList.put(zone, list);
             }
         }
-//            if (!ApkManager.getInstance(appContext).isApkInstalled(item)) {
-//                if (item.hasApk()) {
-//                    if (ApkManager.canDownloadApk(appContext))
-//                        downloadAdFiles(item);
-//                } else
-//                    downloadAdFiles(item);
-//            }
     }
 
     private void pruneAds(List<Ad> ads) {
+        List<Ad> toRemove = new ArrayList<>();
         for (Ad ad : ads) {
             if (ad.isInvalid(appContext))
-                ads.remove(ad);
+                toRemove.add(ad);
+        }
+        for (Ad ad : toRemove) {
+            ads.remove(ad);
         }
     }
 
@@ -368,6 +366,20 @@ class NativeAdProvider {
         DismissOptionsView dismissOptionsView = new DismissOptionsView(context, dismissOptions, delegate);
         dismissOptionsView.setDismissOptions(dismissOptions);
         dismissOptionsView.show();
+    }
+
+    private static class AdsReceivedDelegate extends Delegate {
+        Context context;
+
+        AdsReceivedDelegate(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        void onFinish(boolean success, Object... args) {
+            if (success)
+                NativeAdProvider.getInstance(context).newAdsReceived((List<Ad>) args[0]);
+        }
     }
 
     private static class Acks {
