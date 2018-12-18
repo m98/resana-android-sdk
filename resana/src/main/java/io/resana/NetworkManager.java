@@ -7,6 +7,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,22 +23,51 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-class NetworkHelper {
-    static final String NATIVE_URL = "";
+import io.resana.FileManager.Delegate;
+
+class NetworkManager {
+    static final String NATIVE_URL = "http://172.30.24.84:6644/app/10073/ad/zone?zone=zone2";//todo make it real later
     private static volatile String deviceUserAgent;
-    private static final String TAG = ResanaLog.TAG_PREF + "NetworkHelper";
+    private static final String TAG = ResanaLog.TAG_PREF + "NetworkManager";
+
+    private static NetworkManager instance;
+
+    private Executor getResponseExecutor;
+
+    private NetworkManager() {
+        getResponseExecutor = new ThreadPoolExecutor(0, 1, 60,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
+                new ResanaThreadFactory("Resana_NM_RPool"));
+    }
+
+    static NetworkManager getInstance() {
+        NetworkManager localInstance = instance;
+        if (localInstance == null) {
+            synchronized (FileManager.class) {
+                localInstance = instance;
+                if (localInstance == null)
+                    localInstance = instance = new NetworkManager();
+            }
+        }
+        return localInstance;
+    }
 
     static HttpURLConnection openConnection(String url) throws IOException {
         return openConnection("GET", url, null, null);
     }
 
     static HttpURLConnection openConnection(String method, String url, Map<String, String> headers, Map<String, String> params) throws IOException {
-        ResanaLog.d("NetworkHelper", "openConnection() method = [" + method + "], url = [" + url + "], headers = [" + headers + "], params = [" + params + "]");
+        ResanaLog.d("NetworkManager", "openConnection() method = [" + method + "], url = [" + url + "], headers = [" + headers + "], params = [" + params + "]");
         HttpURLConnection connection;
         int responseCode;
         CookieManager cookieManager = new CookieManager();
@@ -150,38 +183,82 @@ class NetworkHelper {
         });
     }
 
-//todo check it
-    private static class GetJsonResponse extends AsyncTask<String, Void, Boolean> {
+    private static String getJSONFromUrl(String url, Map<String, String> params) {
+        HttpURLConnection connection = null;
+        try {
+            connection = openConnection("GET", url, null, null);
+            connection.connect();
+            int status = connection.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                ResanaLog.e(TAG, "getJSONFromUrl: unable to get response from url " + url + ". error code=" + status);
+                return null;
+            }
+            switch (status) {
+                case 200:
+                case 201:
+                    BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    br.close();
+                    return sb.toString();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+        return null;
+    }
 
-        GetJsonResponse(Context context, FileManager.Delegate delegate) {
+    void getNativeAds(Delegate delegate, String... zone) {
+        new GetJsonResponse(delegate).executeOnExecutor(getResponseExecutor, NATIVE_URL);
+    }
+
+    void getNativeAds(Delegate delegate) {
+        ResanaLog.d(TAG, "getNativeAds:");
+        getNativeAds(delegate, null);
+    }
+
+    private static class GetJsonResponse extends AsyncTask<String, Void, List<Ad>> {
+        Delegate delegate;
+
+        GetJsonResponse(FileManager.Delegate delegate) {
             ResanaLog.d(TAG, "GetJsonResponse");
+            this.delegate = delegate;
         }
 
         @Override
-        protected Boolean doInBackground(String... strings) {
+        protected List<Ad> doInBackground(String... strings) {
+            List<Ad> ads = new ArrayList<>();
             String url = strings[0];
-            Map<String, String> headers = new HashMap<>();
             ResanaLog.d(TAG, "GetJsonResponse.doInBackground:  url=" + url);
+            String rawMsg = getJSONFromUrl(url, null);
+            if (rawMsg == null)
+                return null;
+            ResanaLog.e(TAG, "doInBackground: rawMsg=" + rawMsg);
             try {
-                HttpURLConnection connection = openConnection("GET", url, headers, null);
-                connection.connect();
-                int status = connection.getResponseCode();
-                switch (status) {
-                    case 200:
-                    case 201:
-                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            sb.append(line+"\n");
-                        }
-                        br.close();
-                        return sb.toString();
+                JSONArray adsArray = new JSONObject(rawMsg).getJSONObject("entity").getJSONArray("ads");
+                for (int i = 0; i < adsArray.length(); i++) {
+                    Ad ad = new Ad(adsArray.get(i).toString());
+                    ads.add(ad);
                 }
-            } catch (IOException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return ads;
+        }
+
+        @Override
+        protected void onPostExecute(List<Ad> ads) {
+            if (delegate != null) {
+                if (ads == null)
+                    delegate.onFinish(false);
+                else delegate.onFinish(true, ads);
+            }
         }
     }
 
