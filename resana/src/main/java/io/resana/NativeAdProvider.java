@@ -88,6 +88,7 @@ class NativeAdProvider {
 
     void newAdsReceived(List<Ad> items) {
         ResanaLog.d(TAG, "newAdsReceived: new ads received");
+        pruneAds(items);
         for (Ad item : items) {
             String[] zones = item.data.zones;
             for (String zone : zones) {
@@ -109,6 +110,13 @@ class NativeAdProvider {
 //                } else
 //                    downloadAdFiles(item);
 //            }
+    }
+
+    private void pruneAds(List<Ad> ads) {
+        for (Ad ad : ads) {
+            if (ad.isInvalid(appContext))
+                ads.remove(ad);
+        }
     }
 
     private void downloadAdFiles(final Ad ad) {
