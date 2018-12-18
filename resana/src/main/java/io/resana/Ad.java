@@ -89,15 +89,10 @@ final class Ad implements Parcelable, Serializable {
         return data.landing != null;
     }
 
-    private boolean isOutDated() {
-        return data.ttl > 0 && System.currentTimeMillis() > Long.valueOf(data.ts) + data.ttl * 1000;
-    }
-
     boolean isInvalid() {
-        Log.e(TAG, "isInvalid: isOutDated: " + isOutDated() + " isOldVersion: " + AdVersionKeeper.isOldVersion(this)
+        Log.e(TAG, "isInvalid: isOldVersion: " + AdVersionKeeper.isOldVersion(this)
          + " isRenderedEnough: " + AdVersionKeeper.isRenderedEnough(this));
-        return isOutDated()
-                || AdVersionKeeper.isOldVersion(this)
+        return AdVersionKeeper.isOldVersion(this)
                 || AdVersionKeeper.isRenderedEnough(this);
     }
 
