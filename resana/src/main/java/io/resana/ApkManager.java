@@ -38,7 +38,7 @@ class ApkManager {
         this.appContext = context.getApplicationContext();
     }
 
-    static boolean canDownloadApk(Context context) {
+    private static boolean canDownloadApk(Context context) {
         return StorageManager.canWriteToStorage(context) && StorageManager.canReadFromStorage(context);
     }
 
@@ -50,6 +50,19 @@ class ApkManager {
 
     boolean isApkInstalled(String pkg) {
         return getInstalledPackages().contains(pkg);
+    }
+
+    /**
+     * will check that ad is invalid or not. if ad has apk file and that apk is installed, this ad is invalid
+     * and should not be shown to use.
+     * if app does't has read and write permission, this ad is invalid too.
+     * @param ad
+     * @return whether ad is invalid or not
+     */
+    boolean isAdInvalid(Ad ad) {
+        return
+                isApkInstalled(ad)
+                || !canDownloadApk(appContext);
     }
 
     List<String> getInstalledPackages() {

@@ -89,11 +89,13 @@ final class Ad implements Parcelable, Serializable {
         return data.landing != null;
     }
 
-    boolean isInvalid() {
+    boolean isInvalid(Context context) {
         Log.e(TAG, "isInvalid: isOldVersion: " + AdVersionKeeper.isOldVersion(this)
-         + " isRenderedEnough: " + AdVersionKeeper.isRenderedEnough(this));
+         + " isRenderedEnough: " + AdVersionKeeper.isRenderedEnough(this)
+         + "ApkInstalled: " + ApkManager.getInstance(context).isApkInstalled(this));
         return AdVersionKeeper.isOldVersion(this)
-                || AdVersionKeeper.isRenderedEnough(this);
+                || AdVersionKeeper.isRenderedEnough(this)
+                || ApkManager.getInstance(context).isAdInvalid(this);
     }
 
     boolean hasApk() {
