@@ -138,22 +138,6 @@ class NativeAdProvider {
         return ResanaPreferences.getBoolean(appContext, ad.getId() + "downloaded", false);
     }
 
-    private void pruneAds() {
-        ResanaLog.d(TAG, "pruneAds: ");
-        if (ads == null)
-            return;
-        final Iterator<Ad> itr = ads.get().iterator();
-        Ad ad;
-        while (itr.hasNext()) {
-            ad = itr.next();
-            if (ad.isInvalid()) {
-                itr.remove();
-                ads.needsPersist();
-            }
-        }
-        ads.persistIfNeeded();
-    }
-
     private void roundRobinOnAds() {
         ResanaLog.d(TAG, "roundRobinOnAds: ");
         final Iterator<Ad> itr = ads.get().iterator();
@@ -191,7 +175,6 @@ class NativeAdProvider {
     }
 
     private Ad internalGetAd(boolean hasTitle, String zone) {
-        pruneAds();
         if (ads == null || ads.get().isEmpty()) {
             if (ads == null)
                 ResanaLog.e(TAG, "get: ads is null");
