@@ -12,24 +12,17 @@ abstract class AdDto implements Parcelable, Serializable {
     static final int AD_TYPE_BAD_TYPE = 1; //type 1 should not be used due to a bug in primitive versions
     static final int AD_TYPE_SPLASH = 2;
     static final int AD_TYPE_NATIVE = 3;
+    static final int AD_TYPE_VIDEO_STICKY = 6;
     static final int AD_TYPE_STATIC_BANNER = 4; //todo not handled yet
 
     @Mandatory
-    @NumericValues({AD_TYPE_SUBTITLE, AD_TYPE_SPLASH, AD_TYPE_NATIVE})
+    @NumericValues({AD_TYPE_SPLASH, AD_TYPE_NATIVE, AD_TYPE_VIDEO_STICKY})
     @SerializedName("type")
     Integer type;
 
     @SerializedName("id")
     @Mandatory
     Long id;
-
-    @SerializedName("cat")
-    @Mandatory
-    String cat;
-
-    @SerializedName("ts")
-    @Mandatory
-    String ts;
 
     @SerializedName("bg")
     String backgroundColor;
@@ -82,8 +75,6 @@ abstract class AdDto implements Parcelable, Serializable {
     protected AdDto(Parcel in) {
         type = in.readInt();
         id = in.readLong();
-        cat = in.readString();
-        ts = in.readString();
         backgroundColor = in.readString();
         callForAction = in.readString();
         zones = in.createStringArray();
@@ -107,8 +98,6 @@ abstract class AdDto implements Parcelable, Serializable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(type);
         dest.writeLong(id);
-        dest.writeString(cat);
-        dest.writeString(ts);
         dest.writeString(backgroundColor);
         dest.writeString(callForAction);
         dest.writeStringArray(zones);
