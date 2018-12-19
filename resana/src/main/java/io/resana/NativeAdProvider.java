@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -104,6 +105,16 @@ class NativeAdProvider {
                 adsList.put(zone, list);
             }
         }
+
+        for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
+            Log.e(TAG, "zone: " + entry.getKey());
+            List<Ad> ad = entry.getValue();
+            for (Ad a :
+                    ad) {
+                Log.e(TAG, "ads: " + a.getId());
+            }
+        }
+        downloadFirstAdOfList();
     }
 
     private void pruneAds(List<Ad> ads) {
@@ -117,22 +128,24 @@ class NativeAdProvider {
         }
     }
 
-    private void downloadAdFiles(final Ad ad) {
+    private void downloadAdFiles(final Ad ad, Delegate delegate) {
         VisualsManager.saveVisualsIndex(appContext, ad);
-        FileManager.getInstance(appContext).downloadAdFiles(ad, new Delegate() {
-            @Override
-            void onFinish(boolean success, Object... args) {
-                ResanaLog.d(TAG, "onFinish: downloading native ad files finishes. success " + success);
-                if (success) {
-                    adDownloaded(ad);
-                }
-            }
-        });
+        FileManager.getInstance(appContext).downloadAdFiles(ad, delegate);
     }
 
-    void downloadFistAd() {
+    private void downloadAdFiles(String zone) {
+        ResanaLog.d(TAG, "downloadAdFiles: Downloading ad of list " + zone);
+        List<Ad> ads = adsList.get(zone);
+        if (ads == null || ads.size() == 0)
+            return;
+        DownloadAdFilesDelegate delegate = new DownloadAdFilesDelegate(appContext, zone);
+        downloadAdFiles(ads.get(0), delegate);
+    }
+
+    private void downloadFirstAdOfList() {
+        ResanaLog.d(TAG, "downloadFirstAdOfList: Downloading first ad of all lists");
         for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
-            downloadAdFiles(entry.getValue().get(0));
+            downloadAdFiles(entry.getKey());
         }
     }
 
@@ -379,6 +392,28 @@ class NativeAdProvider {
         void onFinish(boolean success, Object... args) {
             if (success)
                 NativeAdProvider.getInstance(context).newAdsReceived((List<Ad>) args[0]);
+        }
+    }
+
+    private static class DownloadAdFilesDelegate extends Delegate {
+        Context context;
+        String zone;
+
+        DownloadAdFilesDelegate(Context context, String zone) {
+            this.context = context;
+            this.zone = zone;
+        }
+
+        @Override
+        void onFinish(boolean success, Object... args) {
+            ResanaLog.d(TAG, "Download ad files of list " + zone + ". result=" + success);
+            if (!success) {
+                List<Ad> ad = NativeAdProvider.getInstance(context).adsList.get(zone);
+                if (ad == null || ad.size() == 0)
+                    return;
+                ad.remove(0);
+                NativeAdProvider.getInstance(context).downloadAdFiles(zone);
+            }
         }
     }
 
