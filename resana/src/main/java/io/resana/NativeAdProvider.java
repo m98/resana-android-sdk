@@ -70,19 +70,6 @@ class NativeAdProvider {
         }
     }
 
-    void handleBlockedZones(ControlDto ctrl) {
-        ControlDto.BlockedZonesParams params = (ControlDto.BlockedZonesParams) ctrl.params;
-        if (params.zones == null || params.zones.length == 0) {
-            blockedZones = null;
-        } else {
-            blockedZones = new String[params.zones.length];
-            for (int i = 0; i < params.zones.length; i++) {
-                blockedZones[i] = params.zones[i];
-            }
-            persistBlockedZones();
-        }
-    }
-
     void newAdsReceived(List<Ad> items) {
         pruneAds(items);
         ResanaLog.e(TAG, "newAdsReceived: ads size=" + items.size());
@@ -100,8 +87,6 @@ class NativeAdProvider {
                 adsList.put(zone, list);
             }
         }
-
-        adsList.get("all").remove(0);
 
         for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
             Log.e(TAG, "zone: " + entry.getKey());
