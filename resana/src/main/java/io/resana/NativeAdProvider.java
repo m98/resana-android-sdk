@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static io.resana.FileManager.Delegate;
-import static io.resana.FileManager.NATIVE_ADS_FILE_NAME;
 import static io.resana.FileManager.PersistableObject;
 
 class NativeAdProvider {
@@ -25,15 +24,12 @@ class NativeAdProvider {
 
     private static NativeAdProvider instance;
     private Context appContext;
-    private String adsFileName;
     private int adsQueueLength;
     private PersistableObject<Set<Ad>> ads;
     private Map<String, List<Ad>> adsList;
     private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private static String[] blockedZones;
-
-    private boolean needsFlushCache;
 
     static NativeAdProvider getInstance(Context context) {
         NativeAdProvider localInstance = instance;
@@ -48,7 +44,6 @@ class NativeAdProvider {
 
     private NativeAdProvider(Context context) {
         this.appContext = context;
-        this.adsFileName = NATIVE_ADS_FILE_NAME;
         this.adsQueueLength = 4;
         adsList = new HashMap<>();
         loadBlockedZones();
@@ -105,6 +100,8 @@ class NativeAdProvider {
                 adsList.put(zone, list);
             }
         }
+
+        adsList.get("all").remove(0);
 
         for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
             Log.e(TAG, "zone: " + entry.getKey());
@@ -194,36 +191,13 @@ class NativeAdProvider {
     }
 
     private Ad internalGetAd(boolean hasTitle, String zone) {
-        if (ads == null || ads.get().isEmpty()) {
-            if (ads == null)
-                ResanaLog.e(TAG, "get: ads is null");
-            if (ads.get().isEmpty())
-                ResanaLog.e(TAG, "get: ads is empty");
-            ResanaLog.e(TAG, "get: no native ad available.");
+        if (adsList == null) {
             return null;
         }
-        final boolean cooldown = !CoolDownHelper.shouldShowNativeAd(appContext);
-        Ad result = null;
-        final Ad hotAd = nextReadyToRenderAd(true, zone, hasTitle);
-        if (hotAd != null) {
-            result = hotAd;
-        } else {
-            final Ad notHotAd = nextReadyToRenderAd(false, zone, hasTitle);
-            if (notHotAd != null) {
-                result = notHotAd;
-            }
-        }
-
-        if (result != null) {
-            if (!result.data.hot) {
-                roundRobinOnAds();
-                ads.persist();
-            }
-            if (!cooldown)
-                return result;
-            else return null;
-        }
-        return null;
+        List<Ad> ad = adsList.get(zone);
+        if (ad.size() == 0)
+            return null;
+        return ad.get(0);
     }
 
     private Ad nextReadyToRenderAd(boolean hotOnly, String zone, boolean hasTitle) {
@@ -294,12 +268,12 @@ class NativeAdProvider {
 
     NativeAd getAd(boolean hasTitle, String zone) {
         if (ResanaInternal.instance.isInDismissRestTime()) {
-            ResanaLog.d(TAG, "get: Native dismissRestTime");
+            ResanaLog.d(TAG, "getAd: Native dismissRestTime");
             return null;
         }
 
         if (isBlockedZone(zone)) {
-            ResanaLog.e(TAG, "get: zone " + zone + " is blocked");
+            ResanaLog.e(TAG, "getAd: zone " + zone + " is blocked");
             return null;
         }
         final Ad ad = internalGetAd(hasTitle, zone);
