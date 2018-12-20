@@ -7,18 +7,13 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import static io.resana.FileManager.FileSpec;
-import static io.resana.ResanaPreferences.PREF_DELETE_FILES_TIME;
 import static io.resana.ResanaPreferences.PREF_DISMISS_ENABLE;
 import static io.resana.ResanaPreferences.PREF_DISMISS_OPTIONS;
 import static io.resana.ResanaPreferences.PREF_DISMISS_REST_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_DISMISS;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_START_TIME;
-import static io.resana.ResanaPreferences.PREF_RESANA_INFO_LABEL;
-import static io.resana.ResanaPreferences.PREF_RESANA_INFO_TEXT;
 import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.getPrefs;
 import static io.resana.ResanaPreferences.saveLong;
@@ -62,7 +57,8 @@ class ResanaInternal {
         //todo handle config here
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
-        NetworkHelper.checkUserAgent(appContext);
+        NativeAdProvider.getInstance(context);
+        NetworkManager.checkUserAgent(context);
         start();
     }
 
@@ -126,64 +122,6 @@ class ResanaInternal {
         if (splashProvider == null)
             return false;
         return splashProvider.isAdAvailable();
-    }
-
-    private void handleControlMessage(Ad msg) {
-        for (ControlDto ctrl : msg.ctrls) {
-            if (ControlDto.CMD_FLUSH.equals(ctrl.cmd)) {//TODO handle null pointer exeption here
-            } else if (ControlDto.CMD_COOL_DOWN.equals(ctrl.cmd)) {
-                CoolDownHelper.handleCoolDownCtrl(appContext, ctrl);
-            } else if (ControlDto.CMD_RESANA_LABEL.equals(ctrl.cmd)) {
-                handleResanaLabelCtrl(ctrl);
-            } else if (ControlDto.CMD_DISMISS_OPTIONS.equals(ctrl.cmd)) {
-                handleDismissOptionsCtrl(ctrl);
-            } else if (ControlDto.CMD_BLOCKED_ZONES.equals(ctrl.cmd)) {
-                if (nativeProvider != null)
-                    nativeProvider.handleBlockedZones(ctrl);
-            } else if (ControlDto.CMD_LAST_MODIFIED_DATE.equals(ctrl.cmd)) {
-                saveLastModifiedDate(ctrl);
-            }
-        }
-    }
-
-    private void handleResanaLabelCtrl(ControlDto ctrl) {
-        final ControlDto.ResanaLabelParams params = (ControlDto.ResanaLabelParams) ctrl.params;
-        ResanaPreferences.saveString(appContext, PREF_RESANA_INFO_TEXT, params.text);
-        final String curLabel = ResanaPreferences.getString(appContext, PREF_RESANA_INFO_LABEL, "none");
-        if (!curLabel.equals(params.label)) {
-            ResanaPreferences.saveString(appContext, PREF_RESANA_INFO_LABEL, params.label);
-            final FileManager fm = FileManager.getInstance(appContext);
-            if ("none".equals(params.label))
-                fm.deleteFile(new FileSpec("resana_label"), null);
-            else
-                fm.downloadFile(new FileSpec(params.label, "resana_label"), true, null);
-        }
-    }
-
-    private void handleDismissOptionsCtrl(ControlDto ctrl) {
-        ControlDto.DismissOptionsParams params = (ControlDto.DismissOptionsParams) ctrl.params;
-        adsAreDismissible = params.dismissible;
-        if (params.options == null) {
-            dismissOptions = null;
-        } else {
-            dismissOptions = new ArrayList<>();
-            for (Map.Entry<String, String> entry : params.options.entrySet())
-                dismissOptions.add(new DismissOption(entry.getKey(), entry.getValue()));
-        }
-        dismissRestDuration = params.restDuration;
-        getPrefs(appContext).edit()
-                .putBoolean(PREF_DISMISS_ENABLE, adsAreDismissible)
-                .putInt(PREF_DISMISS_REST_DURATION, params.restDuration).apply();
-        if (dismissOptions == null)
-            getPrefs(appContext).edit().remove(PREF_DISMISS_OPTIONS).apply();
-        else
-            getPrefs(appContext).edit().putString(PREF_DISMISS_OPTIONS, new Gson().toJson(dismissOptions)).apply();
-
-    }
-
-    private void saveLastModifiedDate(ControlDto ctrl) {
-        ControlDto.LastModifiedDateParams params = (ControlDto.LastModifiedDateParams) ctrl.params;
-        saveLong(appContext, PREF_DELETE_FILES_TIME, params.modifiedHour);
     }
 
     private void loadDismissOptions() {
