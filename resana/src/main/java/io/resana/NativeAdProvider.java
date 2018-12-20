@@ -392,7 +392,7 @@ class NativeAdProvider {
         @Override
         void onFinish(boolean success, Object... args) {
             if (success)
-                NativeAdProvider.getInstance(context).newAdsReceived((List<Ad>) args[0]);
+                NativeAdProvider.getInstance(context).newAdsReceived((List<Ad>) args[0], zone);
         }
     }
 
