@@ -12,6 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.resana.FileManager.FileSpec;
+
 class ApkManager {
     private static final String TAG = ResanaLog.TAG_PREF + "ApkManager";
     private static final String PREFS = "RESANA_APKS_76432369";
@@ -56,6 +58,7 @@ class ApkManager {
      * will check that ad is invalid or not. if ad has apk file and that apk is installed, this ad is invalid
      * and should not be shown to use.
      * if app does't has read and write permission, this ad is invalid too.
+     *
      * @param ad
      * @return whether ad is invalid or not
      */
@@ -111,14 +114,14 @@ class ApkManager {
     boolean isApkDownloading(Context context, NativeAd ad) {
         if (!ad.hasApk())
             return false;
-        File apkFile = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(appContext);
+        File apkFile = new FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(appContext);
         return isApkDownloading(context, apkFile);
     }
 
     void downloadAndInstallApk(final NativeAd ad, final AdDelegate adDelegate) {
         if (ad == null)
             return;
-        FileManager.FileSpec apkFileSpec = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName());
+        FileSpec apkFileSpec = new FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName());
         File apkFile = apkFileSpec.getFile(appContext);
         ResanaLog.d(TAG, "DownloadAndInstallApk: apk file name: " + apkFile.getName());
         if (isApkDownloading(appContext, apkFile))
@@ -126,7 +129,7 @@ class ApkManager {
         if (adDelegate == null)
             Toast.makeText(appContext, "در حال آماده سازی", Toast.LENGTH_SHORT).show();
         else adDelegate.onPreparingProgram();
-        FileManager.getInstance(appContext).downloadFile(new FileManager.FileSpec(ad.getApkUrl(), FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName()), false, new FileManager.Delegate() {
+        FileManager.getInstance(appContext).downloadFile(new FileSpec(ad.getApkUrl(), FileSpec.DIR_TYPE_APKS, ad.getApkFileName()), false, new FileManager.Delegate() {
             @Override
             void onFinish(boolean success, Object... args) {
                 if (!success) {
@@ -134,12 +137,12 @@ class ApkManager {
                         Toast.makeText(appContext, "مشکلی در آماده سازی برنامه به وجود آمده است", Toast.LENGTH_SHORT).show();
                     else adDelegate.onPreparingProgramError();
                 } else {
-                    File apk = new FileManager.FileSpec(FileManager.FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(appContext);
+                    //todo check install report
+                    File apk = new FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(appContext);
                     ApkManager.installApk(appContext, apk, adDelegate);
                 }
             }
         });
-
     }
 
 }
