@@ -47,6 +47,10 @@ public class Resana {
         ResanaInternal.getInstance(appContext);
     }
 
+    public static void setLogLevel(int logLevel) {
+        ResanaLog.setLogLevel(logLevel);
+    }
+
     public static NativeAd getNativeAd(boolean hasTitle) {
         return ResanaInternal.getInstance(appContext).getNativeAd(hasTitle);
     }
