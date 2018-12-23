@@ -180,17 +180,6 @@ class NativeAdProvider {
         ads.get().add(remove);
     }
 
-    private int numberOfAdsInQueue(long adId) {
-        int res = 0;
-        Iterator<Ad> adsItr = ads.get().iterator();
-        while (adsItr.hasNext()) {
-            Ad ad = adsItr.next();
-            if (ad.data.id == adId)
-                res++;
-        }
-        return res;
-    }
-
     private void loadBlockedZones() {
         ResanaLog.d(TAG, "loadBlockedZones: ");
         String s = ResanaPreferences.getString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, null);
