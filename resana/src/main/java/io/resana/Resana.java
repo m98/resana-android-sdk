@@ -3,16 +3,12 @@ package io.resana;
 import android.content.Context;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Resana {
     ResanaInternal instance;
-    private static boolean initCalled = false;
 
-    private static Set<Resana> references = Collections.synchronizedSet(new HashSet<Resana>());
+    private static Context appContext;
 
     /**
      * Every Detail Will Be Printed In Logcat.
@@ -46,31 +42,21 @@ public class Resana {
     public static void init(Context context, ResanaConfig resanaConfig) {
         if (resanaConfig == null)
             throw new IllegalArgumentException("ResanaConfig cannot be null");
-        ResanaConfig.saveConfigs(context, resanaConfig);
-        initCalled = true;
+        appContext = context;
+        ResanaConfig.saveConfigs(appContext, resanaConfig);
+        ResanaInternal.getInstance(appContext);
     }
 
-    public void release() {
-        if (references.remove(this)) {
-            if (references.size() == 0)
-                instance.internalRelease();
-            instance = null;
-        }
+    public static NativeAd getNativeAd(boolean hasTitle) {
+        return ResanaInternal.getInstance(appContext).getNativeAd(hasTitle);
     }
 
-    public NativeAd getNativeAd(boolean hasTitle) {
-        checkInstance();
-        return instance.getNativeAd(hasTitle);
-    }
-
-    public NativeAd getNativeAd(boolean hasTitle, String zone) {
-        checkInstance();
-        return instance.getNativeAd(hasTitle, zone);
+    public static NativeAd getNativeAd(boolean hasTitle, String zone) {
+        return ResanaInternal.getInstance(appContext).getNativeAd(hasTitle, zone);
     }
 
     public void onNativeAdRendered(NativeAd ad) {
-        checkInstance();
-        instance.onNativeAdRendered(ad);
+        ResanaInternal.getInstance(appContext).onNativeAdRendered(ad);
     }
 
     public void onNativeAdClicked(Context context, NativeAd ad) {
@@ -78,37 +64,27 @@ public class Resana {
     }
 
     public void onNativeAdClicked(Context context, NativeAd ad, AdDelegate adDelegate) {
-        checkInstance();
-        instance.onNativeAdClicked(context, ad, adDelegate);
+        ResanaInternal.getInstance(context).onNativeAdClicked(context, ad, adDelegate);
     }
 
     public void onAdDismissed(String secretKey, DismissOption reason) {
-        checkInstance();
-        instance.onAdDismissed(secretKey, reason);
+        ResanaInternal.getInstance(appContext).onAdDismissed(secretKey, reason);
     }
 
     public void onNativeAdLongClick(Context context, NativeAd ad) {
-        checkInstance();
-        instance.onNativeAdLongClick(context, ad);
+        ResanaInternal.getInstance(context).onNativeAdLongClick(context, ad);
     }
 
     public boolean canDismissAds() {
-        checkInstance();
-        return instance.adsAreDismissible;
+        return ResanaInternal.getInstance(appContext).adsAreDismissible;
     }
 
     public List<DismissOption> getDismissOptions() {
-        checkInstance();
-        if (instance.adsAreDismissible && instance.dismissOptions != null) {
+        if (ResanaInternal.getInstance(appContext).adsAreDismissible && ResanaInternal.getInstance(appContext).dismissOptions != null) {
             List<DismissOption> options = new ArrayList<>();
             options.addAll(instance.dismissOptions);
             return options;
         }
         return null;
-    }
-
-    private void checkInstance() {
-        if (!references.contains(this))
-            throw new IllegalStateException("Bad usage of Resana instance! You should not use an instance after calling release");
     }
 }
