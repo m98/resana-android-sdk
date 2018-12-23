@@ -35,7 +35,8 @@ class ResanaInternal {
     static ResanaInternal instance;
 
     private final Context appContext;
-    private final String media;
+    static String mediaId;
+    static String deviceId;
 
     private SplashAdProvider splashProvider;
 
@@ -48,17 +49,18 @@ class ResanaInternal {
         ResanaLog.v(TAG, "Starting Resana");
         this.appContext = context.getApplicationContext();
         loadDismissOptions();
-        GoalActionMeter.getInstance(context);
-        AdVersionKeeper.init(context);
-        ApkManager.getInstance(context);
-        media = AdViewUtil.getMediaId(appContext);
-        if (media == null)
+        GoalActionMeter.getInstance(appContext);
+        AdVersionKeeper.init(appContext);
+        ApkManager.getInstance(appContext);
+        mediaId = AdViewUtil.getMediaId(appContext);
+        if (mediaId == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
+        deviceId = DeviceCredentials.getDeviceUniqueId(appContext);
         //todo handle config here
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
-        NativeAdProvider.getInstance(context);
-        NetworkManager.checkUserAgent(context);
+        NativeAdProvider.getInstance(appContext);
+        NetworkManager.checkUserAgent(appContext);
         start();
     }
 
@@ -149,19 +151,19 @@ class ResanaInternal {
     void onSplashRendered(Ad ad) {
         if (splashProvider == null)
             return;
-        sendToServer(splashProvider.getRenderAck(ad));
+//        sendToServer(splashProvider.getRenderAck(ad));
     }
 
     void onNativeAdClicked(Context context, NativeAd ad, AdDelegate delegate) {
         NativeAdProvider.getInstance(appContext).onNativeAdClicked(context, ad, delegate);
-        GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
+//        GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
     }
 
     void onSplashClicked(Ad ad) {
         if (splashProvider == null)
             return;
-        GoalActionMeter.getInstance(appContext).checkReport(ad.data.report);
-        sendToServer(splashProvider.getClickAck(ad));
+//        GoalActionMeter.getInstance(appContext).checkReport(ad.data.report);
+//        sendToServer(splashProvider.getClickAck(ad));
     }
 
     void onNativeAdLongClick(Context context, NativeAd ad) {
@@ -172,7 +174,7 @@ class ResanaInternal {
     void onSplashLandingClicked(Ad ad) {
         if (splashProvider == null)
             return;
-        sendToServer(splashProvider.getLandingClickAck(ad));
+//        sendToServer(splashProvider.getLandingClickAck(ad));
     }
 
     void onAdDismissed(String secretKey, DismissOption reason) {
@@ -187,10 +189,6 @@ class ResanaInternal {
 
     boolean isInDismissRestTime() {
         return System.currentTimeMillis() < lastDismissTime + dismissRestDuration * 1000;
-    }
-
-    void sendToServer(String msg) {
-        //todo should be completed
     }
 
     private static class GetControlDataDelegate extends FileManager.Delegate {
