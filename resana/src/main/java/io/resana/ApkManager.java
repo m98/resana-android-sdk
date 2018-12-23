@@ -137,7 +137,7 @@ class ApkManager {
                         Toast.makeText(appContext, "مشکلی در آماده سازی برنامه به وجود آمده است", Toast.LENGTH_SHORT).show();
                     else adDelegate.onPreparingProgramError();
                 } else {
-                    //todo check install report
+                    GoalActionMeter.getInstance(appContext).checkInstall(ad.getOrder(), ad.getApkPackageName());
                     File apk = new FileSpec(FileSpec.DIR_TYPE_APKS, ad.getApkFileName()).getFile(appContext);
                     ApkManager.installApk(appContext, apk, adDelegate);
                 }
