@@ -113,6 +113,19 @@ class NativeAdProvider {
         downloadFirstAdOfList();
     }
 
+    /**
+     * prune all ads
+     */
+    private void pruneAds() {
+        for (Map.Entry<String, List<Ad>> entry : adsMap.entrySet()) {
+            pruneAds(entry.getValue());
+        }
+    }
+
+    /**
+     * prune ads of a list (zone)
+     * @param ads
+     */
     private void pruneAds(List<Ad> ads) {
         List<Ad> toRemove = new ArrayList<>();
         for (Ad ad : ads) {
@@ -282,6 +295,11 @@ class NativeAdProvider {
             return nativeAd;
         }
         return null;
+    }
+
+    void onNativeAdRendered(NativeAd ad) {
+        AdVersionKeeper.adRendered(ad.getId() + "");
+        pruneAds();
     }
 
     void showLanding(final Context context, final NativeAd ad) {
