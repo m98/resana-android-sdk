@@ -37,7 +37,6 @@ class ResanaInternal {
     private final Context appContext;
     private final String media;
 
-    private NativeAdProvider nativeProvider;
     private SplashAdProvider splashProvider;
 
     boolean adsAreDismissible;
@@ -46,6 +45,7 @@ class ResanaInternal {
     private int dismissRestDuration;
 
     private ResanaInternal(Context context) {
+        ResanaLog.v(TAG, "Starting Resana");
         this.appContext = context.getApplicationContext();
         loadDismissOptions();
         GoalActionMeter.getInstance(context);
@@ -63,7 +63,6 @@ class ResanaInternal {
     }
 
     private void start() {
-        ResanaLog.v(TAG, "Start");
         saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
         DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
     }
@@ -95,7 +94,7 @@ class ResanaInternal {
             ResanaLog.e(TAG, "You didn't mention native ads in resana config");
             return null;
         }
-        return nativeProvider.getAd(hasTitle, zone);
+        return NativeAdProvider.getInstance(appContext).getAd(hasTitle, zone);
     }
 
     void attachSplashViewer(SplashAdView adView) {
@@ -144,64 +143,35 @@ class ResanaInternal {
     }
 
     void onNativeAdRendered(NativeAd ad) {
-        if (nativeProvider == null || ad == null)
-            return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_ACK);
-//        sendToServer(nativeProvider.getRenderAck(ad.getSecretKey()));
-        AdVersionKeeper.adRendered(ad.getId() + "");
+        NativeAdProvider.getInstance(appContext).onNativeAdRendered(ad);
     }
 
     void onSplashRendered(Ad ad) {
         if (splashProvider == null)
             return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_ACK);
         sendToServer(splashProvider.getRenderAck(ad));
     }
 
-    void onNativeAdClicked(Context context, NativeAd ad) {
-        onNativeAdClicked(context, ad, null);
-    }
-
-    void onNativeAdClicked(Context context, NativeAd ad, AdDelegate adDelegate) {
-        if (nativeProvider == null || ad == null)
-            return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_CLICK);
+    void onNativeAdClicked(Context context, NativeAd ad, AdDelegate delegate) {
+        NativeAdProvider.getInstance(appContext).onNativeAdClicked(context, ad, delegate);
         GoalActionMeter.getInstance(appContext).checkReport(ad.getSecretKey());
-//        sendToServer(nativeProvider.getClickAck(ad.getSecretKey()));
-        if (ad.hasLanding()) {
-            nativeProvider.showLanding(context, ad, adDelegate);
-        } else {
-            nativeProvider.handleLandingClick(context, ad, adDelegate);
-        }
-
     }
 
     void onSplashClicked(Ad ad) {
         if (splashProvider == null)
             return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_CLICK);
         GoalActionMeter.getInstance(appContext).checkReport(ad.data.report);
         sendToServer(splashProvider.getClickAck(ad));
     }
 
-    void onNativeAdLandingClicked(NativeAd ad) {
-        if (nativeProvider == null || ad == null)
-            return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad.getSecretKey(), SimulateClickDto.ON_LANDING_CLICK);
-//        sendToServer(nativeProvider.getLandingAck(ad.getSecretKey()));
-    }
-
     void onNativeAdLongClick(Context context, NativeAd ad) {
-        if (nativeProvider == null || ad == null)
-            return;
         if (adsAreDismissible)
-            nativeProvider.showDismissOptions(context, ad, dismissOptions, instance);
+            NativeAdProvider.getInstance(appContext).showDismissOptions(context, ad, dismissOptions, instance);
     }
 
     void onSplashLandingClicked(Ad ad) {
         if (splashProvider == null)
             return;
-        ClickSimulator.getInstance(appContext).checkSimulateClicks(ad, SimulateClickDto.ON_LANDING_CLICK);
         sendToServer(splashProvider.getLandingClickAck(ad));
     }
 
@@ -221,5 +191,15 @@ class ResanaInternal {
 
     void sendToServer(String msg) {
         //todo should be completed
+    }
+
+    private static class GetControlDataDelegate extends FileManager.Delegate {
+
+        @Override
+        void onFinish(boolean success, Object... args) {
+            if (success) {
+                //todo save controls
+            }
+        }
     }
 }
