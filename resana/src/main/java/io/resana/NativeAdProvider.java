@@ -27,7 +27,7 @@ class NativeAdProvider {
     private Context appContext;
     private int adsQueueLength;
     private PersistableObject<Set<Ad>> ads;
-    private Map<String, List<Ad>> adsList;
+    private Map<String, List<Ad>> adsMap;
     private List<String> downloadedAds;
     private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
     private Map<String, Acks> waitingForLandingClick = new HashMap<>();
@@ -47,7 +47,7 @@ class NativeAdProvider {
     private NativeAdProvider(Context context) {
         this.appContext = context;
         this.adsQueueLength = 4;
-        adsList = new HashMap<>();
+        adsMap = new HashMap<>();
         downloadedAds = Collections.synchronizedList(new ArrayList<String>());
         loadBlockedZones();
         NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext));
@@ -75,7 +75,6 @@ class NativeAdProvider {
 
     private void newAdsReceived(List<Ad> items) {
         pruneAds(items);
-        ResanaLog.e(TAG, "newAdsReceived: ads size=" + items.size());
         newAdsReceived(items, "");
     }
 
@@ -83,7 +82,7 @@ class NativeAdProvider {
         pruneAds(items);
         ResanaLog.e(TAG, "newAdsReceived: ads size=" + items.size() + (zone.equals("") ? "" : (" zone=" + zone)));
         if (!zone.equals("")) {
-            List<Ad> list = adsList.get(zone);
+            List<Ad> list = adsMap.get(zone);
             if (list == null)
                 list = new ArrayList<>();
             if (list.size() >= adsQueueLength)
@@ -93,7 +92,7 @@ class NativeAdProvider {
             for (Ad item : items) {
                 String[] zones = item.data.zones;
                 for (String adZone : zones) {
-                    List<Ad> list = adsList.get(adZone);
+                    List<Ad> list = adsMap.get(adZone);
                     if (list == null)
                         list = new ArrayList<>();
                     if (list.size() >= adsQueueLength)
@@ -101,12 +100,12 @@ class NativeAdProvider {
                     if (item.data.hot)
                         list.add(0, item);
                     else list.add(item);
-                    adsList.put(adZone, list);
+                    adsMap.put(adZone, list);
                 }
             }
         }
 
-        for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
+        for (Map.Entry<String, List<Ad>> entry : adsMap.entrySet()) {
             Log.e(TAG, "zone: " + entry.getKey());
             List<Ad> ad = entry.getValue();
             for (Ad a :
@@ -135,21 +134,21 @@ class NativeAdProvider {
 
     private void downloadAdFiles(String zone) {
         ResanaLog.d(TAG, "downloadAdFiles: Downloading ad of list " + zone);
-        List<Ad> ads = adsList.get(zone);
+        List<Ad> ads = adsMap.get(zone);
         if (ads == null || ads.size() == 0)
             return;
-        Ad ad = ads.get(0);
-        if (isDownloaded(ad)) {
-            ResanaLog.d(TAG, "downloadAdFiles: ad " + ad.getId() + " is downloaded before");
+        Ad souldDownloadAd = ads.get(0);
+        if (isDownloaded(souldDownloadAd)) {
+            ResanaLog.d(TAG, "downloadAdFiles: ad " + souldDownloadAd.getId() + " is downloaded before");
             return;
         }
-        DownloadAdFilesDelegate delegate = new DownloadAdFilesDelegate(appContext, zone, ad);
-        downloadAdFiles(ad, delegate);
+        DownloadAdFilesDelegate delegate = new DownloadAdFilesDelegate(appContext, zone, souldDownloadAd);
+        downloadAdFiles(souldDownloadAd, delegate);
     }
 
     private void downloadFirstAdOfList() {
         ResanaLog.d(TAG, "downloadFirstAdOfList: Downloading first ad of every list");
-        for (Map.Entry<String, List<Ad>> entry : adsList.entrySet()) {
+        for (Map.Entry<String, List<Ad>> entry : adsMap.entrySet()) {
             downloadAdFiles(entry.getKey());
         }
     }
@@ -200,10 +199,10 @@ class NativeAdProvider {
     }
 
     private Ad internalGetAd(boolean hasTitle, String zone) {
-        if (adsList == null) {
+        if (adsMap == null) {
             return null;
         }
-        List<Ad> adList = adsList.get(zone);
+        List<Ad> adList = adsMap.get(zone);
         if (adList == null) {
             ResanaLog.e(TAG, "getAd: no such " + zone + " zone");
             return null;
@@ -212,32 +211,13 @@ class NativeAdProvider {
             NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext, zone));
         if (adList.size() == 0)
             return null;
-        if (isDownloaded(adList.get(0))) {
+        Ad ad = adList.get(0);
+        if (isDownloaded(ad)) { //todo double check here. round robin on ad list
+            adList.remove(ad);
+            if (ad.data.hot)
+                adList.add(0, ad);
+            else adList.add(ad);
             return adList.get(0);
-        }
-        return null;
-    }
-
-    private Ad nextReadyToRenderAd(boolean hotOnly, String zone, boolean hasTitle) {
-        final Iterator<Ad> iterator = ads.get().iterator();
-        if (!hotOnly) {
-            while (iterator.hasNext()) {
-                Ad ad = iterator.next();
-                if (!hasTitle) {
-                    if (validZone(ad, zone))
-                        return ad;
-                } else if (validZone(ad, zone) && hasTitle(ad))
-                    return ad;
-            }
-        } else {
-            while (iterator.hasNext()) {
-                Ad ad = iterator.next();
-                if (!hasTitle) {
-                    if (ad.data.hot && validZone(ad, zone))
-                        return ad;
-                } else if (ad.data.hot && validZone(ad, zone) && hasTitle(ad))
-                    return ad;
-            }
         }
         return null;
     }
@@ -297,7 +277,7 @@ class NativeAdProvider {
         }
         final Ad ad = internalGetAd(hasTitle, zone);
         if (ad != null) {
-            adsList.get(zone).remove(0);
+            adsMap.get(zone).remove(0);
             downloadAdFiles(zone);
             final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
             final Acks acks = new Acks(ad);
@@ -411,10 +391,10 @@ class NativeAdProvider {
         void onFinish(boolean success, Object... args) {
             ResanaLog.d(TAG, "Download ad files of list " + zone + ". result=" + success);
             if (!success) {
-                List<Ad> ad = NativeAdProvider.getInstance(context).adsList.get(zone);
+                List<Ad> ad = NativeAdProvider.getInstance(context).adsMap.get(zone);
                 if (ad == null || ad.size() == 0)
                     return;
-                ad.remove(0);
+                ad.remove(downloadedAd);
                 NativeAdProvider.getInstance(context).downloadAdFiles(zone);
             } else {
                 NativeAdProvider.getInstance(context).adDownloaded(downloadedAd);
