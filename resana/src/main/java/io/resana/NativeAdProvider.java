@@ -2,7 +2,6 @@ package io.resana;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,8 +28,6 @@ class NativeAdProvider {
     private PersistableObject<Set<Ad>> ads;
     private Map<String, List<Ad>> adsMap;
     private List<String> downloadedAds;
-    private Map<String, Acks> waitingToBeRenderedByClient = new HashMap<>();//todo these should be removed
-    private Map<String, Acks> waitingForLandingClick = new HashMap<>();
     private static String[] blockedZones;
 
     static NativeAdProvider getInstance(Context context) {
@@ -280,8 +277,6 @@ class NativeAdProvider {
             adsMap.get(zone).remove(0);
             downloadAdFiles(zone);
             final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
-            final Acks acks = new Acks(ad);
-            waitingToBeRenderedByClient.put(nativeAd.getSecretKey(), acks);
             GoalActionMeter.getInstance(appContext).persistReport(nativeAd.getSecretKey(), ad.data.report);
             ClickSimulator.getInstance(appContext).persistSimulateClicks(nativeAd.getSecretKey(), ad.data.simulateClicks);
             return nativeAd;
@@ -399,56 +394,6 @@ class NativeAdProvider {
             } else {
                 NativeAdProvider.getInstance(context).adDownloaded(downloadedAd);
             }
-        }
-    }
-
-    private static class Acks {
-
-        String order;
-
-        String render;
-        String click;
-        String landing;
-
-        Acks() {
-
-        }
-
-        Acks(Ad ad) {
-            this.order = ad.getOrder();
-            this.render = ad.getRenderAck();
-            this.click = ad.getClickAck();
-            this.landing = ad.getLandingClickAck();
-        }
-
-        void saveToPrefs(SharedPreferences prefs, String key) {
-            final SharedPreferences.Editor editor = prefs.edit();
-            if (order != null)
-                editor.putString(key + "_order", order);
-            if (render != null)
-                editor.putString(key + "_render", render);
-            if (click != null)
-                editor.putString(key + "_click", click);
-            if (landing != null)
-                editor.putString(key + "_land", landing);
-            editor.apply();
-        }
-
-        Acks fromPrefs(SharedPreferences prefs, String key) {
-            order = prefs.getString(key + "_order", null);
-            render = prefs.getString(key + "_render", null);
-            click = prefs.getString(key + "_click", null);
-            landing = prefs.getString(key + "_land", null);
-            return this;
-        }
-
-        void removeFromPref(SharedPreferences prefs, String key) {
-            prefs.edit()
-                    .remove(key + "_order")
-                    .remove(key + "_render")
-                    .remove(key + "_click")
-                    .remove(key + "_land")
-                    .apply();
         }
     }
 }
