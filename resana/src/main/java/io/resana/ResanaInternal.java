@@ -14,9 +14,15 @@ import static io.resana.ResanaPreferences.PREF_DISMISS_REST_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_DISMISS;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_DURATION;
 import static io.resana.ResanaPreferences.PREF_LAST_SESSION_START_TIME;
+import static io.resana.ResanaPreferences.UUID;
+import static io.resana.ResanaPreferences.UUID_EXISTS;
+import static io.resana.ResanaPreferences.getBoolean;
 import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.getPrefs;
+import static io.resana.ResanaPreferences.getString;
+import static io.resana.ResanaPreferences.saveBoolean;
 import static io.resana.ResanaPreferences.saveLong;
+import static io.resana.ResanaPreferences.saveString;
 
 class ResanaInternal {
     private static final String TAG = ResanaLog.TAG_PREF + "Resana";
@@ -55,7 +61,7 @@ class ResanaInternal {
         mediaId = AdViewUtil.getMediaId(appContext);
         if (mediaId == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
-        deviceId = DeviceCredentials.getDeviceUniqueId(appContext);
+        initializeDeviceId();
         //todo handle config here
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
@@ -66,7 +72,16 @@ class ResanaInternal {
 
     private void start() {
         saveLong(appContext, PREF_LAST_SESSION_START_TIME, System.currentTimeMillis());
-        DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
+//        DataCollector.reportSessionDuration(getLong(appContext, PREF_LAST_SESSION_DURATION, -1));
+    }
+
+    private void initializeDeviceId() {
+        if (getBoolean(appContext, UUID_EXISTS, false)) {
+            deviceId = DeviceCredentials.getDeviceUniqueId(appContext);
+            saveString(appContext, UUID, deviceId);
+            saveBoolean(appContext, UUID_EXISTS, true);
+        } else
+            deviceId = getString(appContext, UUID, "9e8f6aba-f02f-46a5-a4e4-90b6c5e9a2eb");
     }
 
     static ResanaInternal getInstance(Context context) {
@@ -182,8 +197,8 @@ class ResanaInternal {
             lastDismissTime = System.currentTimeMillis();
             getPrefs(appContext).edit().putLong(PREF_LAST_DISMISS, System.currentTimeMillis()).apply();
             String ad = AdDatabase.getInstance(appContext).getOrderIdForSecretKey(secretKey);
-            if (ad != null)
-                DataCollector.reportAdDismissed(ad, reason);
+//            if (ad != null)
+//                DataCollector.reportAdDismissed(ad, reason);
         }
     }
 
