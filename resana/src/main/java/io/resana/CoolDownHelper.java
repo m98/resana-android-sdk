@@ -18,8 +18,6 @@ import static io.resana.ResanaPreferences.getFloat;
 import static io.resana.ResanaPreferences.getInt;
 import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.remove;
-import static io.resana.ResanaPreferences.saveFloat;
-import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveLong;
 
 class CoolDownHelper {
@@ -93,24 +91,5 @@ class CoolDownHelper {
         remove(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE);
         remove(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_TS);
         remove(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_INTERVAL);
-    }
-
-    static void handleCoolDownCtrl(Context context, ControlDto ctrl) {
-        final ControlDto.CoolDownParams.Chance splash = ((ControlDto.CoolDownParams) ctrl.params).splash;
-        final ControlDto.CoolDownParams.Chance nativeAd = ((ControlDto.CoolDownParams) ctrl.params).nativeAd;
-        if (splash != null) {
-            saveLong(context, PREF_CTRL_SPLASH_COOL_DOWN_TS, System.currentTimeMillis());
-            saveFloat(context, PREF_CTRL_SPLASH_COOL_DOWN_CHANCE, (float) (splash.chance));
-            saveInt(context, PREF_CTRL_SPLASH_COOL_DOWN_TTL, splash.ttl);
-            saveFloat(context, PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE, (float) splash.first);
-            saveInt(context, PREF_CTRL_SPLASH_COOL_DOWN_FIRST_CHANCE_INTERVAL, splash.interval);
-        }
-        if (nativeAd != null) {
-            saveLong(context, PREF_CTRL_NATIVE_COOL_DOWN_TS, System.currentTimeMillis());
-            saveFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_CHANCE, (float) (nativeAd.chance));
-            saveInt(context, PREF_CTRL_NATIVE_COOL_DOWN_TTL, (nativeAd.ttl));
-            saveFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE, (float) nativeAd.first);
-            saveInt(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_INTERVAL, nativeAd.interval);
-        }
     }
 }
