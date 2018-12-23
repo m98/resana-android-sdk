@@ -218,7 +218,7 @@ class NetworkManager {
     }
 
     private String generateReportUrl(String type, String adId) {
-        String mediaId = ResanaInternal.media;
+        String mediaId = ResanaInternal.mediaId;
         return BASE_URL + "/api/" + mediaId + "/report/" + type + "/" + adId;
     }
 
