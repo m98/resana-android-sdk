@@ -30,16 +30,6 @@ class ResanaPreferences {
     static final String PREF_LOC_TIME = "PREF_LOC_TIME";
 
 
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_MAX = "CTRL_SUB_CD_MAX";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_MIN = "CTRL_SUB_CD_MIN";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST = "CTRL_SUB_CD_FIRST";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_TTL = "CTRL_SUB_CD_TTL";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_TS = "CTRL_SUB_CD_TS";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_CHANCE = "CTRL_SUB_CD_CHANCE";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE = "CTRL_SUB_CD_FCH";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE_TS = "CTRL_SUB_CD_FCH_TS";
-    static final String PREF_CTRL_SUBTITLE_COOL_DOWN_FIRST_CHANCE_INTERVAL = "CTRL_SUB_CD_FCH_I";
-
     static final String PREF_CTRL_SPLASH_COOL_DOWN_CHANCE = "CTRL_SP_CD_CHANCE";
     static final String PREF_CTRL_SPLASH_COOL_DOWN_TTL = "CTRL_SP_CD_TTL";
     static final String PREF_CTRL_SPLASH_COOL_DOWN_TS = "CTRL_SP_CD_TS";
