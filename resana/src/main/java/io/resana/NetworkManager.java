@@ -36,7 +36,10 @@ import java.util.concurrent.TimeUnit;
 import io.resana.FileManager.Delegate;
 
 class NetworkManager {
-    static final String NATIVE_URL = "http://172.30.24.84:6644/app/10073/ad/zone?zone=zone2";//todo make it real later
+    static final String BASE_URL = "";
+    static final String NATIVE_URL = "http://172.30.24.84:6644/app/10073/ad/type?type=native";//todo make it real later
+    static final String CONTROL_URL = "";
+
     private static volatile String deviceUserAgent;
     private static final String TAG = ResanaLog.TAG_PREF + "NetworkManager";
 
@@ -53,7 +56,7 @@ class NetworkManager {
     static NetworkManager getInstance() {
         NetworkManager localInstance = instance;
         if (localInstance == null) {
-            synchronized (FileManager.class) {
+            synchronized (NetworkManager.class) {
                 localInstance = instance;
                 if (localInstance == null)
                     localInstance = instance = new NetworkManager();
@@ -183,14 +186,14 @@ class NetworkManager {
         });
     }
 
-    private static String getJSONFromUrl(String url, Map<String, String> params) {
+    private static String getResponseFromUrl(String url, String method, Map<String, String> headers, Map<String, String> params) {
         HttpURLConnection connection = null;
         try {
-            connection = openConnection("GET", url, null, null);
+            connection = openConnection(method, url, headers, params);
             connection.connect();
             int status = connection.getResponseCode();
             if (status != HttpURLConnection.HTTP_OK) {
-                ResanaLog.e(TAG, "getJSONFromUrl: unable to get response from url " + url + ". error code=" + status);
+                ResanaLog.e(TAG, "getResponseFromUrl: unable to get response from url " + url + ". error code=" + status);
                 return null;
             }
             switch (status) {
@@ -214,6 +217,11 @@ class NetworkManager {
         return null;
     }
 
+    private String generateReportUrl(String type, String adId) {
+        String mediaId = ResanaInternal.media;
+        return BASE_URL + "/api/" + mediaId + "/report/" + type + "/" + adId;
+    }
+
     void getNativeAds(Delegate delegate, String... zone) {
         new GetJsonResponse(delegate).executeOnExecutor(getResponseExecutor, NATIVE_URL);
     }
@@ -223,10 +231,14 @@ class NetworkManager {
         getNativeAds(delegate, null);
     }
 
+    void sendReports(String type, String adId) {
+        new PutReport(type, adId, null).execute(type, adId);
+    }
+
     private static class GetJsonResponse extends AsyncTask<String, Void, List<Ad>> {
         Delegate delegate;
 
-        GetJsonResponse(FileManager.Delegate delegate) {
+        GetJsonResponse(Delegate delegate) {
             ResanaLog.d(TAG, "GetJsonResponse");
             this.delegate = delegate;
         }
@@ -236,7 +248,7 @@ class NetworkManager {
             List<Ad> ads = new ArrayList<>();
             String url = strings[0];
             ResanaLog.d(TAG, "GetJsonResponse.doInBackground:  url=" + url);
-            String rawMsg = getJSONFromUrl(url, null);
+            String rawMsg = getResponseFromUrl(url, "GET", null, null);
             if (rawMsg == null)
                 return null;
             ResanaLog.e(TAG, "doInBackground: rawMsg=" + rawMsg);
@@ -259,6 +271,29 @@ class NetworkManager {
                     delegate.onFinish(false);
                 else delegate.onFinish(true, ads);
             }
+        }
+    }
+
+    private static class PutReport extends AsyncTask<String, Void, Boolean> {
+        String type;
+        String adId;
+        Delegate delegate;
+
+        PutReport(String type, String adId, Delegate delegate) {
+            ResanaLog.d(TAG, "PutReport");
+            this.type = type;
+            this.adId = adId;
+            this.delegate = delegate;
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            String url = NetworkManager.getInstance().generateReportUrl(type, adId);
+            ResanaLog.d(TAG, "PutReport.doInBackground: put to " + url);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("X-RS-DEVICE-ID", ResanaInternal.deviceId);
+            String rawMsg = getResponseFromUrl(url, "PUT", headers, null);//todo get response to check error code
+            return null;
         }
     }
 
