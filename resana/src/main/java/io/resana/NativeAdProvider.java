@@ -280,7 +280,6 @@ class NativeAdProvider {
             downloadAdFiles(zone);
             final NativeAd nativeAd = new NativeAd(appContext, ad, AdDatabase.getInstance(appContext).generateSecretKey(ad));
             GoalActionMeter.getInstance(appContext).persistReport(nativeAd.getSecretKey(), ad.data.report);
-            ClickSimulator.getInstance(appContext).persistSimulateClicks(nativeAd.getSecretKey(), ad.data.simulateClicks);
             return nativeAd;
         }
         return null;
@@ -291,11 +290,19 @@ class NativeAdProvider {
         pruneAds();
     }
 
-    void showLanding(final Context context, final NativeAd ad) {
-        showLanding(context, ad, null);
+    void onNativeAdClicked(Context context, NativeAd ad, AdDelegate delegate) {
+        if (ad.hasLanding()) {
+            showLanding(context, ad, delegate);
+        } else {
+            handleLandingClick(context, ad, delegate);
+        }
     }
 
-    void showLanding(final Context context, final NativeAd ad, final AdDelegate adDelegate) {
+    private void onNativeAdLandingClicked(NativeAd ad) {
+        //todo send report to sever
+    }
+
+    private void showLanding(final Context context, final NativeAd ad, final AdDelegate adDelegate) {
         final NativeLandingView nativeLandingView = new NativeLandingView(context, ad);
         nativeLandingView.setDelegate(new LandingView.Delegate() {
             @Override
@@ -306,18 +313,14 @@ class NativeAdProvider {
             @Override
             public void landingActionClicked() {
                 handleLandingClick(context, ad, adDelegate);
-                ResanaInternal.instance.onNativeAdLandingClicked(ad);
+                onNativeAdLandingClicked(ad);
                 nativeLandingView.dismiss();
             }
         });
         nativeLandingView.show();
     }
 
-    void handleLandingClick(final Context context, final NativeAd ad) {
-        handleLandingClick(context, ad, null);
-    }
-
-    void handleLandingClick(final Context context, final NativeAd ad, AdDelegate adDelegate) {
+    private void handleLandingClick(final Context context, final NativeAd ad, AdDelegate adDelegate) {
         if (ResanaInternal.instance == null)
             return;
         if (ApkManager.getInstance(context).isApkDownloading(context, ad)) {
