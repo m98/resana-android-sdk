@@ -87,4 +87,8 @@ public class Resana {
         }
         return null;
     }
+
+    public static String getVersion() {
+        return ResanaInternal.SDK_VERSION;
+    }
 }
