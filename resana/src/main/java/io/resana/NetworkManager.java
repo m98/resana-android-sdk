@@ -223,7 +223,7 @@ class NetworkManager {
     }
 
     void getNativeAds(Delegate delegate, String... zone) {
-        new GetJsonResponse(delegate).executeOnExecutor(getResponseExecutor, NATIVE_URL);
+        new GetAds(delegate).executeOnExecutor(getResponseExecutor, NATIVE_URL);
     }
 
     void getNativeAds(Delegate delegate) {
@@ -235,11 +235,11 @@ class NetworkManager {
         new PutReport(type, adId, null).execute(type, adId);
     }
 
-    private static class GetJsonResponse extends AsyncTask<String, Void, List<Ad>> {
+    private static class GetAds extends AsyncTask<String, Void, List<Ad>> {
         Delegate delegate;
 
-        GetJsonResponse(Delegate delegate) {
-            ResanaLog.d(TAG, "GetJsonResponse");
+        GetAds(Delegate delegate) {
+            ResanaLog.d(TAG, "GetAds");
             this.delegate = delegate;
         }
 
@@ -247,7 +247,7 @@ class NetworkManager {
         protected List<Ad> doInBackground(String... strings) {
             List<Ad> ads = new ArrayList<>();
             String url = strings[0];
-            ResanaLog.d(TAG, "GetJsonResponse.doInBackground:  url=" + url);
+            ResanaLog.d(TAG, "GetAds.doInBackground:  url=" + url);
             String rawMsg = getResponseFromUrl(url, "GET", null, null);
             if (rawMsg == null)
                 return null;
