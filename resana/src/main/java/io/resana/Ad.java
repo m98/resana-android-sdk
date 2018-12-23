@@ -21,7 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -55,12 +54,9 @@ final class Ad implements Parcelable, Serializable {
             final Object o = (new JSONTokener(rawMsg)).nextValue();
             if (o instanceof JSONObject) {
                 data = parseAdDto(rawMsg, (JSONObject) o);
-            } else if (o instanceof JSONArray)
-                ctrls = ControlDto.parseArray(((JSONArray) o));
+            }
             else
                 throw new RuntimeException("invalid!");
-            if (ResanaInternal.instance != null)
-                ResanaInternal.instance.sendToServer("TMP:" + (System.currentTimeMillis() - time));
         } catch (Exception e) { //JSONException or any other unExpected Exception
             isCorrupted = true;
             ResanaLog.w(TAG, "Could not parse a message", e);
@@ -122,18 +118,6 @@ final class Ad implements Parcelable, Serializable {
         if (data != null)
             return data.type;
         return -1;
-    }
-
-    String getRenderAck() {
-        return "A" + "_" + data.id;
-    }
-
-    String getClickAck() {
-        return "C" + "_" + data.id;
-    }
-
-    String getLandingClickAck() {
-        return "CL" + "_" + data.id;
     }
 
     String getOrder() {

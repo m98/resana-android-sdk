@@ -326,8 +326,8 @@ class SplashAdProvider {
         while (itr.hasNext() && ad == null) {
             ad = itr.next();
             itr.remove();
-            if (ad.isInvalid())
-                ad = null;
+//            if (ad.isInvalid()) //todo
+//                ad = null;
             ads.needsPersist();
         }
         ads.persistIfNeeded();
@@ -370,11 +370,11 @@ class SplashAdProvider {
         final Iterator<Ad> iterator = ads.get().iterator();
         Ad ad;
         while (iterator.hasNext()) {
-            ad = iterator.next();
-            if (ad.isInvalid()) {
-                iterator.remove();
-                ads.needsPersist();
-            }
+            ad = iterator.next(); //todo
+//            if (ad.isInvalid()) {
+//                iterator.remove();
+//                ads.needsPersist();
+//            }
         }
         ads.persistIfNeeded();
     }
@@ -384,40 +384,18 @@ class SplashAdProvider {
         final Iterator<Ad> iterator = downloadedAds.get().iterator();
         Ad ad;
         while (iterator.hasNext()) {
-            ad = iterator.next();
-            if (ad.isInvalid()) {
-                iterator.remove();
-                unlockAdFiles(ad);
-                toBeDeletedAds.add(ad);
-                downloadedAds.needsPersist();
-            }
+            ad = iterator.next();//todo handle here
+//            if (ad.isInvalid()) {
+//                iterator.remove();
+//                unlockAdFiles(ad);
+//                toBeDeletedAds.add(ad);
+//                downloadedAds.needsPersist();
+//            }
         }
         downloadedAds.persistIfNeeded();
         garbageCollectAdFiles();
     }
-
-    String getRenderAck(Ad ad) {
-        if (waitingToRender.indexOf(ad) < 0)
-            return null;
-        waitingToRender.remove(ad);
-        waitingToClick.add(ad);
-        return ad.getRenderAck();
-    }
-
-    String getClickAck(Ad ad) {
-        if (waitingToClick.indexOf(ad) < 0)
-            return null;
-        waitingToClick.remove(ad);
-        waitingToLandingClick.add(ad);
-        return ad.getClickAck();
-    }
-
-    String getLandingClickAck(Ad ad) {
-        if (waitingToLandingClick.indexOf(ad) < 0)
-            return null;
-        waitingToLandingClick.remove(ad);
-        return ad.getLandingClickAck();
-    }
+//todo handle view and click reports
 
     private static class LoadCacheAdsDelegate extends Delegate {
         WeakReference<SplashAdProvider> providerRef;
