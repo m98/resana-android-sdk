@@ -286,11 +286,13 @@ class NativeAdProvider {
     }
 
     void onNativeAdRendered(NativeAd ad) {
+        NetworkManager.getInstance().sendReports(Reports.view, ad.getId() + "");
         AdVersionKeeper.adRendered(ad.getId() + "");
         pruneAds();
     }
 
     void onNativeAdClicked(Context context, NativeAd ad, AdDelegate delegate) {
+        NetworkManager.getInstance().sendReports(Reports.click, ad.getId() + "");
         if (ad.hasLanding()) {
             showLanding(context, ad, delegate);
         } else {
@@ -299,7 +301,7 @@ class NativeAdProvider {
     }
 
     private void onNativeAdLandingClicked(NativeAd ad) {
-        //todo send report to sever
+        NetworkManager.getInstance().sendReports(Reports.landingClick, ad.getId() + "");
     }
 
     private void showLanding(final Context context, final NativeAd ad, final AdDelegate adDelegate) {
@@ -405,5 +407,12 @@ class NativeAdProvider {
                 NativeAdProvider.getInstance(context).adDownloaded(downloadedAd);
             }
         }
+    }
+
+    class Reports {
+        static final String view = "view";
+        static final String click = "click1";
+        static final String landingClick = "click2";
+        static final String install = "install";
     }
 }
