@@ -175,7 +175,9 @@ class NativeAdProvider {
             if (ad.data.hot)
                 adList.add(0, ad);
             else adList.add(ad);
-            return ad;
+            if (CoolDownHelper.shouldShowNativeAd(appContext))
+                return ad;
+            else return null;
         }
         return null;
     }

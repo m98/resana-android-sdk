@@ -44,14 +44,8 @@ class CoolDownHelper {
 
 
     static boolean shouldShowNativeAd(Context context) {
-        validateNativeAdCoolDownData(context);
-        if (isFirstNativeAd(context)) {
-            saveLong(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_TS, System.currentTimeMillis());
-            final float first = getFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE, 1f);
-            return Math.random() < first;
-        }
-        final float chance = getFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_CHANCE, 1f);
-        return Math.random() < chance;
+        float chance = Util.getNativeChance(context);
+        return Math.random() <= chance;
     }
 
     private static boolean isFirstNativeAd(Context context) {
