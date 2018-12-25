@@ -222,6 +222,15 @@ class NetworkManager {
         return BASE_URL + "/api/" + mediaId + "/ctrl";
     }
 
+    private String generateGettingAdsUrl(String type, String zone) {
+        String mediaId = ResanaInternal.mediaId;
+        String url = BASE_URL + "/api/" + mediaId + "/ad/";
+        if (!zone.equals(""))
+            url += "zone/type?zone=" + zone + "&type=" + type;
+        else url += "type?type=" + type;
+        return url;
+    }
+
     private String generateReportUrl(String type, String adId) {
         String mediaId = ResanaInternal.mediaId;
         return BASE_URL + "/api/" + mediaId + "/report/" + type + "/" + adId;
@@ -231,10 +240,19 @@ class NetworkManager {
         new GetControls(context).executeOnExecutor(getResponseExecutor);
     }
 
-    void getNativeAds(Delegate delegate, String... zone) {
-        new GetAds(delegate).executeOnExecutor(getResponseExecutor, NATIVE_URL);
+    /**
+     * this method will get ads for specific zone
+     * @param delegate
+     * @param zone
+     */
+    void getNativeAds(Delegate delegate, String zone) {
+        new GetAds(delegate, Ad.Types.nativeAd, zone).executeOnExecutor(getResponseExecutor);
     }
 
+    /**
+     * this method will get all native ads
+     * @param delegate
+     */
     void getNativeAds(Delegate delegate) {
         ResanaLog.d(TAG, "getNativeAds:");
         getNativeAds(delegate, null);
@@ -246,16 +264,24 @@ class NetworkManager {
 
     private static class GetAds extends AsyncTask<String, Void, List<Ad>> {
         Delegate delegate;
+        String type;
+        String zone;
 
-        GetAds(Delegate delegate) {
+        GetAds(Delegate delegate, String type) {
+            this(delegate, type, "");
+        }
+
+        GetAds(Delegate delegate, String type, String zone) {
             ResanaLog.d(TAG, "GetAds");
             this.delegate = delegate;
+            this.type = type;
+            this.zone = zone;
         }
 
         @Override
         protected List<Ad> doInBackground(String... strings) {
             List<Ad> ads = new ArrayList<>();
-            String url = strings[0];
+            String url = NetworkManager.getInstance().generateGettingAdsUrl(type, zone);
             ResanaLog.d(TAG, "GetAds.doInBackground:  url=" + url);
             String rawMsg = getResponseFromUrl(url, "GET", null, null);
             if (rawMsg == null)

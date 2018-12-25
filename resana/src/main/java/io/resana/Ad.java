@@ -291,9 +291,8 @@ final class Ad implements Parcelable, Serializable {
         }
     };
 
-    static class Flags {
-        static final int UR_ACTION_ON_IMAGE_CLICK = 0b1;
-        static final int SUBTITLE_NOT_SKIPPABLE = 0b10;
-        static final int SPLASH_END_OF_VIDEO = 0b100;
+    static class Types {
+        static final String nativeAd = "native";
+        static final String splashAd = "splash";
     }
 }
