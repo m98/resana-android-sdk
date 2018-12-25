@@ -9,8 +9,11 @@ import java.io.UnsupportedEncodingException;
 
 import static io.resana.ResanaPreferences.PREF_BLOCKED_ZONES;
 import static io.resana.ResanaPreferences.PREF_CONTROLS_TTL;
+import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_CHANCE;
 import static io.resana.ResanaPreferences.PREF_RESANA_INFO_TEXT;
+import static io.resana.ResanaPreferences.getFloat;
 import static io.resana.ResanaPreferences.getInt;
+import static io.resana.ResanaPreferences.saveFloat;
 import static io.resana.ResanaPreferences.saveInt;
 import static io.resana.ResanaPreferences.saveString;
 
@@ -57,6 +60,7 @@ class Util {
     static void saveControls(Context context, ControlDto controlDto) {
         saveInt(context, PREF_CONTROLS_TTL, controlDto.controlsTTL);
         saveString(context, PREF_RESANA_INFO_TEXT, controlDto.resanaLabel);
+        saveFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_CHANCE, controlDto.nativeChance);
         StringBuilder blockedZones = new StringBuilder();
         for (String blockZone : controlDto.blockedZones) {
             blockedZones.append(blockZone).append(";");
@@ -66,6 +70,10 @@ class Util {
 
     static int getControlsTTL(Context context) {
         return getInt(context, PREF_CONTROLS_TTL, 1000);
+    }
+
+    static float getNativeChance(Context context) {
+        return getFloat(context, PREF_CTRL_NATIVE_COOL_DOWN_CHANCE, 1);
     }
 
     static String[] getBlockedZones(Context context) {

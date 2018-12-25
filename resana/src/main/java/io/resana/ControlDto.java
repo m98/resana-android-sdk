@@ -20,14 +20,23 @@ class ControlDto implements Parcelable, Serializable {
             return new ControlDto[size];
         }
     };
+    @SerializedName("ch0")
+    int nativeChance = 1;
+    @SerializedName("ch1")
+    int splashChance = 1;
     @SerializedName("ttl")
     int controlsTTL = 1000;
     @SerializedName("rl")
     String resanaLabel = ResanaInternal.DEFAULT_RESANA_INFO_TEXT;
     @SerializedName("bz")
     String[] blockedZones;
+    @SerializedName("ch2")
+    int videoStickyChance = 1;
 
     protected ControlDto(Parcel in) {
+        nativeChance = in.readInt();
+        splashChance = in.readInt();
+        videoStickyChance = in.readInt();
         controlsTTL = in.readInt();
         resanaLabel = in.readString();
         blockedZones = in.createStringArray();
@@ -40,6 +49,9 @@ class ControlDto implements Parcelable, Serializable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(nativeChance);
+        dest.writeInt(splashChance);
+        dest.writeInt(videoStickyChance);
         dest.writeInt(controlsTTL);
         dest.writeString(resanaLabel);
         dest.writeStringArray(blockedZones);
