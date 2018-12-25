@@ -84,7 +84,11 @@ class NativeAdProvider {
                 list = new ArrayList<>();
             if (list.size() >= adsQueueLength)
                 return;
-            list.addAll(items);
+            for (Ad item : items) {
+                if (item.data.hot)
+                    list.add(0, item);
+                else list.add(item);
+            }
         } else {
             for (Ad item : items) {
                 String[] zones = item.data.zones;
@@ -124,6 +128,7 @@ class NativeAdProvider {
 
     /**
      * prune ads of a list (zone)
+     *
      * @param ads
      */
     private void pruneAds(List<Ad> ads) {
