@@ -52,20 +52,6 @@ class NativeAdProvider {
         return Arrays.asList(blockedZones).contains(zone);
     }
 
-    private void persistBlockedZones() {
-        ResanaLog.d(TAG, "persistBlockedZones: ");
-        if (blockedZones == null || blockedZones.length == 0)
-            ResanaPreferences.remove(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES);
-        else {
-            String s = "";
-            for (int i = 0; i < blockedZones.length; i++) {
-                s += blockedZones[i];
-                s += ";";
-            }
-            ResanaPreferences.saveString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, s);
-        }
-    }
-
     private void newAdsReceived(List<Ad> items) {
         pruneAds(items);
         newAdsReceived(items, "");
