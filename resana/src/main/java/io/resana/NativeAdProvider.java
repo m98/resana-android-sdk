@@ -180,12 +180,14 @@ class NativeAdProvider {
             ResanaLog.e(TAG, "getAd: no such " + zone + " zone");
             return null;
         }
-        if (adList.size() <= 2)
+        if (adList.size() <= 1) {
             NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext, zone));
-        if (adList.size() == 0)
-            return null;
+            if (adList.size() == 0) {
+                return null;
+            }
+        }
         Ad ad = adList.get(0);
-        if (isDownloaded(ad)) { //todo double check here. round robin on ad list
+        if (isDownloaded(ad)) { //round robin on ads
             adList.remove(ad);
             if (ad.data.hot)
                 adList.add(0, ad);
