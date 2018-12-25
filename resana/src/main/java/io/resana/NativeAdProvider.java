@@ -164,7 +164,7 @@ class NativeAdProvider {
             return null;
         }
         if (adList.size() <= 1) {
-            NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext, zone));
+            NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext, zone), zone);
             if (adList.size() == 0) {
                 return null;
             }
