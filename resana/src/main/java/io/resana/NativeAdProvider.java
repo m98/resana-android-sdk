@@ -40,7 +40,7 @@ class NativeAdProvider {
     private NativeAdProvider(Context context) {
         this.appContext = context;
         this.adsQueueLength = 4;
-        adsMap = new HashMap<>();
+        adsMap = Collections.synchronizedMap(new HashMap<String, List<Ad>>());
         downloadedAds = Collections.synchronizedList(new ArrayList<String>());
         loadBlockedZones();
         NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext));
@@ -63,7 +63,7 @@ class NativeAdProvider {
         if (!zone.equals("")) {
             List<Ad> list = adsMap.get(zone);
             if (list == null)
-                list = new ArrayList<>();
+                list = Collections.synchronizedList(new ArrayList<Ad>());
             if (list.size() >= adsQueueLength)
                 return;
             for (Ad item : items) {
@@ -77,7 +77,7 @@ class NativeAdProvider {
                 for (String adZone : zones) {
                     List<Ad> list = adsMap.get(adZone);
                     if (list == null)
-                        list = new ArrayList<>();
+                        list = Collections.synchronizedList(new ArrayList<Ad>());
                     if (list.size() >= adsQueueLength)
                         break;
                     if (item.data.hot)
