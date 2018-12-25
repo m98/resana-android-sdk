@@ -8,13 +8,16 @@ import android.util.Base64;
 import java.io.UnsupportedEncodingException;
 
 import static io.resana.ResanaPreferences.PREF_BLOCKED_ZONES;
+import static io.resana.ResanaPreferences.PREF_CONTROLS_TS;
 import static io.resana.ResanaPreferences.PREF_CONTROLS_TTL;
 import static io.resana.ResanaPreferences.PREF_CTRL_NATIVE_COOL_DOWN_CHANCE;
 import static io.resana.ResanaPreferences.PREF_RESANA_INFO_TEXT;
 import static io.resana.ResanaPreferences.getFloat;
 import static io.resana.ResanaPreferences.getInt;
+import static io.resana.ResanaPreferences.getLong;
 import static io.resana.ResanaPreferences.saveFloat;
 import static io.resana.ResanaPreferences.saveInt;
+import static io.resana.ResanaPreferences.saveLong;
 import static io.resana.ResanaPreferences.saveString;
 
 class Util {
@@ -66,6 +69,11 @@ class Util {
             blockedZones.append(blockZone).append(";");
         }
         saveString(context, PREF_BLOCKED_ZONES, blockedZones.toString());
+        saveLong(context, PREF_CONTROLS_TS, System.currentTimeMillis() / 1000);
+    }
+
+    static long getControlsTS(Context context) {
+        return getLong(context, PREF_CONTROLS_TS, 0);
     }
 
     static int getControlsTTL(Context context) {

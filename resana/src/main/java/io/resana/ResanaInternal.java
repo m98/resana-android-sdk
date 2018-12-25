@@ -40,7 +40,7 @@ class ResanaInternal {
 
     static ResanaInternal instance;
 
-    private final Context appContext;
+    private Context appContext;
     static String mediaId;
     static String deviceId;
 
@@ -62,7 +62,8 @@ class ResanaInternal {
         if (mediaId == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
         initializeDeviceId();
-        NetworkManager.getInstance().getControls(appContext);
+        if (shouldGetControls())
+            NetworkManager.getInstance().getControls(appContext);
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
         NativeAdProvider.getInstance(appContext);
@@ -100,6 +101,10 @@ class ResanaInternal {
     void internalRelease() {
         saveSessionDuration();
         instance = null;
+    }
+
+    private boolean shouldGetControls() {
+        return ((System.currentTimeMillis() / 1000) - Util.getControlsTS(appContext)) >= Util.getControlsTTL(appContext);
     }
 
     NativeAd getNativeAd(boolean hasTitle) {

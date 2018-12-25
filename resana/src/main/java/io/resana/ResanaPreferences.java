@@ -48,6 +48,7 @@ class ResanaPreferences {
     static final String PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_INTERVAL = "CTRL_NATIVE_CD_FCH_I";
 
     static final String PREF_CONTROLS_TTL = "CONTROLS_TTL";
+    static final String PREF_CONTROLS_TS = "CONTROLS_TS";
 
     static final String PREF_SHOULD_CLEANUP_OLD_FILES = "SHOULD_CLEANUP_OLD_FILES";
     static final String PREF_RESANA_INFO_TEXT = "RESANA_INFO_TEXT";
