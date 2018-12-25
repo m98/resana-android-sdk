@@ -4,6 +4,9 @@
 </p>
 
 # Resana android SDK
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a8b989790c594609a9811a5991fd0fb9)](https://app.codacy.com/app/ehsansouri23/resana-android-sdk?utm_source=github.com&utm_medium=referral&utm_content=oddrun/resana-android-sdk&utm_campaign=Badge_Grade_Dashboard)
+
 Resana is a mobile ad network. it helps you to improve your bussines.
 
 
