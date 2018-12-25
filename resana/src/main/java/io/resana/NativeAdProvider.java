@@ -152,13 +152,13 @@ class NativeAdProvider {
         List<Ad> ads = adsMap.get(zone);
         if (ads == null || ads.size() == 0)
             return;
-        Ad souldDownloadAd = ads.get(0);
-        if (isDownloaded(souldDownloadAd)) {
-            ResanaLog.d(TAG, "downloadAdFiles: ad " + souldDownloadAd.getId() + " is downloaded before");
+        Ad shouldDownloadAd = ads.get(0);
+        if (isDownloaded(shouldDownloadAd)) {
+            ResanaLog.d(TAG, "downloadAdFiles: ad " + shouldDownloadAd.getId() + " is downloaded before");
             return;
         }
-        DownloadAdFilesDelegate delegate = new DownloadAdFilesDelegate(appContext, zone, souldDownloadAd);
-        downloadAdFiles(souldDownloadAd, delegate);
+        DownloadAdFilesDelegate delegate = new DownloadAdFilesDelegate(appContext, zone, shouldDownloadAd);
+        downloadAdFiles(shouldDownloadAd, delegate);
     }
 
     private void downloadFirstAdOfList() {
