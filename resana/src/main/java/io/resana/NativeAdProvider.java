@@ -221,41 +221,9 @@ class NativeAdProvider {
             if (ad.data.hot)
                 adList.add(0, ad);
             else adList.add(ad);
-            return adList.get(0);
+            return ad;
         }
         return null;
-    }
-
-    /**
-     * will check that should show an ad with a specific zone
-     *
-     * @param zones zones of an ad
-     * @param zone  a zone we want to get ad for
-     * @return
-     */
-    private boolean validZone(String[] zones, String zone) {
-        ResanaLog.d(TAG, "validZone: zone: " + zone);
-        if (zones == null)
-            ResanaLog.d(TAG, "validZone: ad has no zone.");
-        else
-            for (int i = 0; i < zones.length; i++) {
-                ResanaLog.d(TAG, "validZone: ad zone: " + zones[i]);
-            }
-        if (zone.equals(""))
-            if (zones == null || zones.length == 0)
-                return true;
-        if (!zone.equals("")) {
-            if (zones == null || zones.length == 0)
-                return true;
-            if (Arrays.asList(zones).contains(zone))
-                return true;
-        }
-        return false;
-    }
-
-    private boolean validZone(Ad ad, String zone) {
-        String[] zones = ad.data.zones;
-        return validZone(zones, zone);
     }
 
     /**
