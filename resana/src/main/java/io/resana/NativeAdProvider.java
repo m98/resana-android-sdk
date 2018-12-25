@@ -42,7 +42,7 @@ class NativeAdProvider {
         this.adsQueueLength = 4;
         adsMap = Collections.synchronizedMap(new HashMap<String, List<Ad>>());
         downloadedAds = Collections.synchronizedList(new ArrayList<String>());
-        loadBlockedZones();
+        blockedZones = Util.getBlockedZones(context);
         NetworkManager.getInstance().getNativeAds(new AdsReceivedDelegate(appContext));
     }
 
@@ -152,23 +152,6 @@ class NativeAdProvider {
 
     private boolean isDownloaded(Ad ad) {
         return downloadedAds.contains(ad.getId());
-    }
-
-    private void loadBlockedZones() {
-        ResanaLog.d(TAG, "loadBlockedZones: ");
-        String s = ResanaPreferences.getString(appContext, ResanaPreferences.PREEF_BLOCKED_ZONES, null);
-        if (s != null && s.length() > 0) {
-            String[] zones = s.split(";");
-            blockedZones = new String[zones.length];
-            for (int i = 0; i < zones.length; i++) {
-                blockedZones[i] = zones[i];
-                ResanaLog.d(TAG, "blockedZone: " + blockedZones[i]);
-            }
-        } else {
-            blockedZones = null;
-            ResanaLog.d(TAG, "loadBlockedZones: there is no block zone");
-        }
-
     }
 
     private Ad internalGetAd(boolean hasTitle, String zone) {

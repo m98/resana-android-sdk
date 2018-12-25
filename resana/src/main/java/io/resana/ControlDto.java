@@ -21,9 +21,9 @@ class ControlDto implements Parcelable, Serializable {
         }
     };
     @SerializedName("ttl")
-    int controlsTTL;
+    int controlsTTL = 1000;
     @SerializedName("rl")
-    String resanaLabel;
+    String resanaLabel = ResanaInternal.DEFAULT_RESANA_INFO_TEXT;
     @SerializedName("bz")
     String[] blockedZones;
 
