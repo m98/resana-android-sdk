@@ -10,13 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static io.resana.FileManager.Delegate;
-import static io.resana.FileManager.PersistableObject;
 
 class NativeAdProvider {
     private static final String TAG = ResanaLog.TAG_PREF + "NativeAdProvider";
@@ -25,7 +22,6 @@ class NativeAdProvider {
     private static NativeAdProvider instance;
     private Context appContext;
     private int adsQueueLength;
-    private PersistableObject<Set<Ad>> ads;
     private Map<String, List<Ad>> adsMap;
     private List<String> downloadedAds;
     private static String[] blockedZones;
@@ -175,14 +171,6 @@ class NativeAdProvider {
 
     private boolean isDownloaded(Ad ad) {
         return downloadedAds.contains(ad.getId());
-    }
-
-    private void roundRobinOnAds() {
-        ResanaLog.d(TAG, "roundRobinOnAds: ");
-        final Iterator<Ad> itr = ads.get().iterator();
-        Ad remove = itr.next();
-        itr.remove();
-        ads.get().add(remove);
     }
 
     private void loadBlockedZones() {
