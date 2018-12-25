@@ -45,7 +45,7 @@ Initialize Resana at the beginning of you application by caling Resana.init meth
 Resana.init(Context, ResanaConfig)
 ```
 
-resanaCongig is configuration of resana and should be implemented like this:
+`resanaCongig` is configuration of resana and should be implemented like this:
 
 ```ruby
 ResanaConfig resanaConfig = new ResanaConfig(ResanaConfig.AdTypes[], ResanaConfig.VisualTypes[]);
@@ -53,11 +53,11 @@ ResanaConfig resanaConfig = new ResanaConfig(ResanaConfig.AdTypes[], ResanaConfi
 
 first argument of this class is an array of ads you want to use and second is the array of visual types you want.
 
-* ResanaConfig.AdType.**NATIVE**: native ads
-* ResanaConfig.AdType.**SPLASH**: splash ads
-* ResanaConfig.VisualType.**SQUARE**: square visual of ad
-* ResanaConfig.VisualType.**HORIZONTAL**: horizental visual of ad
-* ResanaConfig.VisualType.**OROGINAL**: original visual of ad
+* `ResanaConfig.AdType.NATIVE`: native ads
+* `ResanaConfig.AdType.SPLASH`: splash ads
+* `ResanaConfig.VisualType.SQUARE`: square visual of ad
+* `ResanaConfig.VisualType.HORIZONTAL`: horizental visual of ad
+* `ResanaConfig.VisualType.OROGINAL`: original visual of ad
 
 Resana.init will only save configuration and will not start resana.
 for starting resana use Resana.create
@@ -115,9 +115,9 @@ String NativeAd.getMediumTitleText()
 ```
 
 Each native ad has some visuals. visual can be picture, video or webview. each visual has followings:
-* orgVisual: original visual
-* sqVisual: square visual
-* hrzLanding: horizontal visual
+* `orgVisual`: original visual
+* `sqVisual`: square visual
+* `hrzLanding`: horizontal visual
 
 by the following methods you can get visual data of a native ad. <br />
 
@@ -179,7 +179,7 @@ public interface AdDelegate {
 ```
 <br />
 
-* onPreparingProgram() is called when file is downloading
-* onPreparingProgramError() is called when there is a problem in downloading file. This problem can be due to the slow or deadlock of the Internet or the lack of permission to write to the disk
-* onInstallingProgramErro() is called when there is a problem installing file. This problem can be due to lack of permission to write to the disk
+* `onPreparingProgram()` is called when file is downloading
+* `onPreparingProgramError()` is called when there is a problem in downloading file. This problem can be due to the slow or deadlock of the Internet or the lack of permission to write to the disk
+* `onInstallingProgramErro()` is called when there is a problem installing file. This problem can be due to lack of permission to write to the disk
 
