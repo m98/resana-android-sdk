@@ -52,11 +52,6 @@ class NativeAdProvider {
         return Arrays.asList(blockedZones).contains(zone);
     }
 
-    private void newAdsReceived(List<Ad> items) {
-        pruneAds(items);
-        newAdsReceived(items, "");
-    }
-
     private void newAdsReceived(List<Ad> items, String zone) {
         pruneAds(items);
         ResanaLog.e(TAG, "newAdsReceived: ads size=" + items.size() + (zone.equals("") ? "" : (" zone=" + zone)));
