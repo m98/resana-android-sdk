@@ -47,6 +47,8 @@ class ResanaPreferences {
     static final String PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_TS = "CTRL_NATIVE_CD_FCH_TS";
     static final String PREF_CTRL_NATIVE_COOL_DOWN_FIRST_CHANCE_INTERVAL = "CTRL_NATIVE_CD_FCH_I";
 
+    static final String PREF_CONTROLS_TTL = "CONTROLS_TTL";
+
     static final String PREF_SHOULD_CLEANUP_OLD_FILES = "SHOULD_CLEANUP_OLD_FILES";
     static final String PREF_RESANA_INFO_TEXT = "RESANA_INFO_TEXT";
     static final String PREF_RESANA_INFO_LABEL = "RESANA_INFO_LABEL";
@@ -60,7 +62,7 @@ class ResanaPreferences {
     static final String PREF_LAST_DISMISS = "LAST_DISMISS";
     static final String PREF_REPORT_METADATA_FIELDS = "TEL_MDATA_LIST";
     static final String PREF_REPORT_METADATA_INTERVAL = "TEL_MDATA_I";
-    static final String PREEF_BLOCKED_ZONES = "BLOCKED_ZONES";
+    static final String PREF_BLOCKED_ZONES = "BLOCKED_ZONES";
 
     static final String PREF_VISUAL_INDEX = "PREF_VIS_INDEX";
 

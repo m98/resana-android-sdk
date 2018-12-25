@@ -217,9 +217,18 @@ class NetworkManager {
         return null;
     }
 
+    private String generateControlsUrl() {
+        String mediaId = ResanaInternal.mediaId;
+        return BASE_URL + "/api/" + mediaId + "/ctrl";
+    }
+
     private String generateReportUrl(String type, String adId) {
         String mediaId = ResanaInternal.mediaId;
         return BASE_URL + "/api/" + mediaId + "/report/" + type + "/" + adId;
+    }
+
+    void getControls(Context context) {
+        new GetControls(context).executeOnExecutor(getResponseExecutor);
     }
 
     void getNativeAds(Delegate delegate, String... zone) {
@@ -251,7 +260,7 @@ class NetworkManager {
             String rawMsg = getResponseFromUrl(url, "GET", null, null);
             if (rawMsg == null)
                 return null;
-            ResanaLog.e(TAG, "doInBackground: rawMsg=" + rawMsg);
+            ResanaLog.d(TAG, "GetAds.doInBackground: rawMsg=" + rawMsg);
             try {
                 JSONArray adsArray = new JSONObject(rawMsg).getJSONObject("entity").getJSONArray("ads");
                 for (int i = 0; i < adsArray.length(); i++) {
@@ -271,6 +280,28 @@ class NetworkManager {
                     delegate.onFinish(false);
                 else delegate.onFinish(true, ads);
             }
+        }
+    }
+
+    private static class GetControls extends AsyncTask<String, Void, Void> {
+        Context context;
+
+        GetControls(Context context) {
+            ResanaLog.d(TAG, "GetControls");
+            this.context = context;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String url = NetworkManager.getInstance().generateControlsUrl();
+            ResanaLog.d(TAG, "GetControls.doInBackground:  url=" + url);
+            String rawMsg = getResponseFromUrl(url, "GET", null, null);
+            if (rawMsg == null)
+                return null;
+            ResanaLog.d(TAG, "GetControls.doInBackground: rawMsg=" + rawMsg);
+            ControlDto controlDto = DtoParser.parse(rawMsg, ControlDto.class);
+            Util.saveControls(context, controlDto);
+            return null;
         }
     }
 

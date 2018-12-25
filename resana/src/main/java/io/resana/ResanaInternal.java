@@ -62,7 +62,7 @@ class ResanaInternal {
         if (mediaId == null)
             throw new IllegalArgumentException("ResanaMediaId is not defined properly");
         initializeDeviceId();
-        //todo handle config here
+        NetworkManager.getInstance().getControls(appContext);
         FileManager.getInstance(appContext).cleanupOldFilesIfNeeded();
         FileManager.getInstance(appContext).deleteOldAndCorruptedFiles();
         NativeAdProvider.getInstance(appContext);
